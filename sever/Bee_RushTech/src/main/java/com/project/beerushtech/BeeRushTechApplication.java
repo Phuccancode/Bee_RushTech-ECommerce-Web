@@ -1,4 +1,4 @@
-package com.project.Bee_RushTech;
+package com.project.beerushtech;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
