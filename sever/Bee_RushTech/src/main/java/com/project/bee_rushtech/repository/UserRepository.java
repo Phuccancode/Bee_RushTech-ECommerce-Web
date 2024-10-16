@@ -1,8 +1,8 @@
-package com.project.beerushtech.repository;
+package com.project.bee_rushtech.repository;
 
 import org.springframework.stereotype.Repository;
 
-import com.project.beerushtech.domain.User;
+import com.project.bee_rushtech.domain.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

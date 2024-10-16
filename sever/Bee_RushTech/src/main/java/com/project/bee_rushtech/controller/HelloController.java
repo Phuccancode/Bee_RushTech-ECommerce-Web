@@ -1,4 +1,4 @@
-package com.project.beerushtech.controller;
+package com.project.bee_rushtech.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

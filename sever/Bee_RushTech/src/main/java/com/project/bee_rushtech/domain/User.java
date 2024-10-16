@@ -1,4 +1,4 @@
-package com.project.beerushtech.domain;
+package com.project.bee_rushtech.domain;
 
 import lombok.Getter;
 import lombok.Setter;
