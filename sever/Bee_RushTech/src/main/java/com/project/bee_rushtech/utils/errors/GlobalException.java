@@ -1,4 +1,4 @@
-package com.project.bee_rushtech.util.error;
+package com.project.bee_rushtech.utils.errors;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -10,7 +10,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.project.bee_rushtech.domain.RestResponse;
+
+import com.project.bee_rushtech.models.RestResponse;
 
 import java.util.stream.Collectors;
 

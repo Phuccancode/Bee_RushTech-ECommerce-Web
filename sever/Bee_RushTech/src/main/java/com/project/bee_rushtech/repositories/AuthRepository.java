@@ -1,9 +1,9 @@
-package com.project.bee_rushtech.repository;
+package com.project.bee_rushtech.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.project.bee_rushtech.domain.User;
+import com.project.bee_rushtech.models.User;
 
 @Repository
 public interface AuthRepository extends JpaRepository<User, Long> {

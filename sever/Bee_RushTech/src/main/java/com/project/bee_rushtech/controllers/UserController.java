@@ -1,7 +1,8 @@
-package com.project.bee_rushtech.controller;
+package com.project.bee_rushtech.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
-import com.project.bee_rushtech.service.UserService;
+
+import com.project.bee_rushtech.services.UserService;
 
 @RestController
 public class UserController {

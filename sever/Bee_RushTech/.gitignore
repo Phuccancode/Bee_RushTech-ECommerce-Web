@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### project files ###
+pom.xml
+application.properties
+### others ###

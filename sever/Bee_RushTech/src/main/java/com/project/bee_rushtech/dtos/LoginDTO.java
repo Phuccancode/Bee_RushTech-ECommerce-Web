@@ -1,4 +1,4 @@
-package com.project.bee_rushtech.domain.dto;
+package com.project.bee_rushtech.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

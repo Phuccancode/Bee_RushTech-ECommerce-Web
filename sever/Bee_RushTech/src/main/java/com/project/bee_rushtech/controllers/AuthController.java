@@ -1,4 +1,4 @@
-package com.project.bee_rushtech.controller;
+package com.project.bee_rushtech.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.bee_rushtech.domain.User;
-import com.project.bee_rushtech.domain.dto.LoginDTO;
-import com.project.bee_rushtech.service.AuthService;
+import com.project.bee_rushtech.dtos.LoginDTO;
+import com.project.bee_rushtech.models.User;
+import com.project.bee_rushtech.services.AuthService;
 
 @RestController
 public class AuthController {

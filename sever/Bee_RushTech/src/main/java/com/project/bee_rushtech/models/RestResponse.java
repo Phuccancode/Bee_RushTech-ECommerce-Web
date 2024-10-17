@@ -1,4 +1,4 @@
-package com.project.bee_rushtech.domain;
+package com.project.bee_rushtech.models;
 
 public class RestResponse<T> {
     private int statusCode;

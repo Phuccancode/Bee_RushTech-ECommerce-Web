@@ -1,4 +1,4 @@
-package com.project.bee_rushtech.domain;
+package com.project.bee_rushtech.models;
 
 import lombok.Getter;
 import lombok.Setter;

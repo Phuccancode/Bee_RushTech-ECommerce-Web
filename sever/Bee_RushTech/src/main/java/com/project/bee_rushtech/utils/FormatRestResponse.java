@@ -1,4 +1,4 @@
-package com.project.bee_rushtech.util;
+package com.project.bee_rushtech.utils;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -7,7 +7,9 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-import com.project.bee_rushtech.domain.RestResponse;
+
+import com.project.bee_rushtech.models.RestResponse;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 @ControllerAdvice

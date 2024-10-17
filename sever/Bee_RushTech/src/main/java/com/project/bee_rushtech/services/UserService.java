@@ -1,8 +1,9 @@
-package com.project.bee_rushtech.service;
+package com.project.bee_rushtech.services;
 
 import org.springframework.stereotype.Service;
-import com.project.bee_rushtech.repository.UserRepository;
-import com.project.bee_rushtech.domain.User;
+
+import com.project.bee_rushtech.models.User;
+import com.project.bee_rushtech.repositories.UserRepository;
 
 @Service
 public class UserService {
