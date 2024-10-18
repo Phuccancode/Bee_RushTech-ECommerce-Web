@@ -1,4 +1,4 @@
-package com.project.Bee_RushTech;
+package com.project.bee_rushtech;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

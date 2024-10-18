@@ -1,4 +1,4 @@
-package com.project.Bee_RushTech.dtos;
+package com.project.bee_rushtech.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;

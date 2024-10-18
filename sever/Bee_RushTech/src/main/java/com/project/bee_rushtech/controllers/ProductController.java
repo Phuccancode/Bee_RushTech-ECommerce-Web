@@ -1,6 +1,6 @@
-package com.project.Bee_RushTech.controllers;
+package com.project.bee_rushtech.controllers;
 
-import com.project.Bee_RushTech.dtos.ProductDTO;
+import com.project.bee_rushtech.dtos.ProductDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -105,7 +105,7 @@ public class ProductController {
     }
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable long id
-            , @ModelAttribute ProductDTO productDTO){
+            ,@Valid @ModelAttribute ProductDTO productDTO){
 
 
         return ResponseEntity.ok("Product with id "+id+" is updated");
