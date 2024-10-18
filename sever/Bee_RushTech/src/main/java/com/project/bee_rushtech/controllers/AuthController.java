@@ -17,6 +17,8 @@ import com.project.bee_rushtech.services.AuthService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public class AuthController {
@@ -55,6 +57,11 @@ public class AuthController {
         ResLoginDTO resLoginDTO = new ResLoginDTO();
         resLoginDTO.setAccess_token(access_token);
         return ResponseEntity.ok().body(resLoginDTO);
+    }
+
+    @GetMapping("/")
+    public String getHomePage() {
+        return "Welcome to Bee Rushtech";
     }
 
 }
