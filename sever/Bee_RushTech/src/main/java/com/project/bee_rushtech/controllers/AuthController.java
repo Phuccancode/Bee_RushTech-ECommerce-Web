@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +55,7 @@ public class AuthController {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         // create a token
         String access_token = this.securityUtil.createToken(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication); // set authentication vào SecurityContext
         ResLoginDTO resLoginDTO = new ResLoginDTO();
         resLoginDTO.setAccess_token(access_token);
         return ResponseEntity.ok().body(resLoginDTO);
