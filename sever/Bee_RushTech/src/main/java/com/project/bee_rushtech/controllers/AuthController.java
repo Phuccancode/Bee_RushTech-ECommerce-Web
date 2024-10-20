@@ -63,7 +63,12 @@ public class AuthController {
 
     @GetMapping("/")
     public String getHomePage() {
-        return "Welcome to Bee Rushtech";
+        return "Welcome to Bee Rushtech by GET";
+    }
+
+    @PostMapping("/")
+    public String postHomePage() {
+        return "Welcome to Bee Rushtech by POST";
     }
 
 }
