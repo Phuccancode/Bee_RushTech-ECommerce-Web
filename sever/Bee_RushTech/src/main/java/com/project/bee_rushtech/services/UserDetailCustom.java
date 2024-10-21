@@ -21,7 +21,6 @@ public class UserDetailCustom implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // TODO Auto-generated method stub
         com.project.bee_rushtech.models.User user = this.authService.loadUserByUsername(username);
         System.out.println(user);
         if (user == null) {

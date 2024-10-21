@@ -16,6 +16,7 @@ import com.project.bee_rushtech.dtos.ResLoginDTO;
 import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.services.AuthService;
 import com.project.bee_rushtech.utils.SecurityUtil;
+import com.project.bee_rushtech.utils.errors.InvalidException;
 
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +39,10 @@ public class AuthController {
     }
 
     @PostMapping("/auth/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
+    public ResponseEntity<User> register(@Valid @RequestBody User user) throws InvalidException {
+        if (this.authService.checkUserExists(user.getEmail())) {
+            throw new InvalidException("Email is already taken");
+        }
         String hashPassword = this.passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
         User newUser = this.authService.handleCreateUser(user);
@@ -51,13 +55,19 @@ public class AuthController {
         // Nạp input gồm username/password vào Security
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getUsername(), loginDTO.getPassword());
+
         // xác thực người dùng => cần viết hàm loadUserByUsername
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         // create a token
-        String access_token = this.securityUtil.createToken(authentication);
+        String access_token = this.securityUtil.createAccessToken(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication); // set authentication vào SecurityContext
         ResLoginDTO resLoginDTO = new ResLoginDTO();
+        User userDB = this.authService.loadUserByUsername(loginDTO.getUsername());
+        ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userDB.getId(), userDB.getEmail(),
+                userDB.getFirstName());
+        resLoginDTO.setUser(userLogin);
         resLoginDTO.setAccess_token(access_token);
+        String refresh_token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), resLoginDTO);
         return ResponseEntity.ok().body(resLoginDTO);
     }
 

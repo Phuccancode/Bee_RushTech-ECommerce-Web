@@ -18,6 +18,10 @@ public class AuthService {
     }
 
     public User loadUserByUsername(String email) {
-        return this.authRepository.findByEmail(email);
+        return this.authRepository.findUserByEmail(email);
+    }
+
+    public boolean checkUserExists(String email) {
+        return this.authRepository.existsByEmail(email);
     }
 }
