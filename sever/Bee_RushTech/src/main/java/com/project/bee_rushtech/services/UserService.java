@@ -13,12 +13,16 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User handleUpdateUser(User user) {
+    public User handleCreateUser(User user) {
         return this.userRepository.save(user);
     }
 
     public User getUserByEmail(String email) {
         return this.userRepository.findByEmail(email);
+    }
+
+    public boolean checkUserExists(String email) {
+        return this.userRepository.existsByEmail(email);
     }
 
 }
