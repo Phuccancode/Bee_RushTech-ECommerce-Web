@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -19,13 +20,14 @@ import java.util.stream.Collectors;
 public class GlobalException {
     @ExceptionHandler(value = {
             UsernameNotFoundException.class,
-            BadCredentialsException.class
+            BadCredentialsException.class,
+            InvalidException.class,
     })
     public ResponseEntity<RestResponse<Object>> handleException(Exception e) {
         RestResponse<Object> res = new RestResponse<Object>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError(e.getMessage());
-        res.setMessage("Invalid username or password");
+        res.setMessage("Bad request");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
