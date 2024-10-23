@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                         authz -> authz
                                 .requestMatchers("/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/customer/register").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -57,13 +58,6 @@ public class SecurityConfiguration {
     @Value("${project.jwt.base64-secret}")
     private String jwtKey;
 
-    // @Bean
-    // public AuthenticationManager
-    // authenticationManager(AuthenticationConfiguration
-    // authenticationConfiguration)
-    // throws Exception {
-    // return authenticationConfiguration.getAuthenticationManager();
-    // }
     private SecretKey getSecretKey() {
         byte[] keyBytes = Base64.from(jwtKey).decode();
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, SecurityUtil.JWT_ALGORITHM.getName());

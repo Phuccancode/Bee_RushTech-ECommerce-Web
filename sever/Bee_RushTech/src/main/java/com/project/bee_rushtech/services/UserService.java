@@ -25,4 +25,12 @@ public class UserService {
         return this.userRepository.existsByEmail(email);
     }
 
+    public void updateUserToken(String token, String email) {
+        User currentUser = this.getUserByEmail(email);
+        if (currentUser != null) {
+            currentUser.setRefreshToken(token);
+            this.userRepository.save(currentUser);
+        }
+    }
+
 }
