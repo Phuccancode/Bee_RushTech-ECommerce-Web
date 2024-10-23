@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +19,11 @@ import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
+import com.project.bee_rushtech.utils.errors.InvalidException;
 
 import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
@@ -54,7 +58,7 @@ public class AuthController {
         ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userDB.getId(), userDB.getEmail(),
                 userDB.getFirstName());
         resLoginDTO.setUser(userLogin);
-        String access_token = this.securityUtil.createAccessToken(authentication, resLoginDTO.getUser());
+        String access_token = this.securityUtil.createAccessToken(authentication.getName(), resLoginDTO.getUser());
 
         resLoginDTO.setAccess_token(access_token);
         // create refresh token
@@ -89,14 +93,62 @@ public class AuthController {
         return ResponseEntity.ok().body(userLogin);
     }
 
-    @GetMapping("/")
-    public String getHomePage() {
-        return "Welcome to Bee Rushtech by GET";
+    @GetMapping("/auth/refresh")
+    @ApiMessage("Get User by refresh token")
+    public ResponseEntity<ResLoginDTO> getRefreshToken(@CookieValue(name = "refresh_token") String refreshToken)
+            throws InvalidException {
+        Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(refreshToken);
+        String email = tokenDecoded.getSubject();
+
+        User currentUser = this.userService.getUserByRefreshTokenAndEmail(refreshToken, email);
+        if (currentUser == null) {
+            throw new InvalidException("Refresh token is invalid");
+        }
+
+        ResLoginDTO resLoginDTO = new ResLoginDTO();
+        User userDB = this.userService.getUserByEmail(email);
+        ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userDB.getId(), userDB.getEmail(),
+                userDB.getFirstName());
+        resLoginDTO.setUser(userLogin);
+        String access_token = this.securityUtil.createAccessToken(email, resLoginDTO.getUser());
+
+        resLoginDTO.setAccess_token(access_token);
+        // create refresh token
+        String newRefreshToken = this.securityUtil.createRefreshToken(email, resLoginDTO);
+
+        // update refresh token to user
+        this.userService.updateUserToken(newRefreshToken, email);
+        ResponseCookie cookie = ResponseCookie
+                .from("refresh_token", newRefreshToken)
+                .httpOnly(true)
+                .maxAge(jwtRefreshExpiration)
+                .path("/")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(resLoginDTO);
     }
 
-    @PostMapping("/")
-    public String postHomePage() {
-        return "Welcome to Bee Rushtech by POST";
+    @PostMapping("/auth/logout")
+    @ApiMessage("Logout successfully")
+    public ResponseEntity<Void> logout() throws InvalidException {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
+        if (email.isEmpty()) {
+            throw new InvalidException("User is not authenticated");
+        }
+        this.userService.updateUserToken("", email);
+
+        ResponseCookie cookie = ResponseCookie
+                .from("refresh_token", "")
+                .httpOnly(true)
+                .maxAge(0)
+                .path("/")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(null);
     }
 
 }
