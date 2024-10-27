@@ -1,7 +1,10 @@
 package com.project.bee_rushtech.controllers;
 
 import com.project.bee_rushtech.dtos.ProductDTO;
+import com.project.bee_rushtech.models.Product;
+import com.project.bee_rushtech.services.IProductService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +24,12 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("${api.prefix}/products")
+@RequiredArgsConstructor
 public class ProductController {
+    private final IProductService productService;
+
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(@Valid @ModelAttribute ProductDTO productDTO,
-//                                                @RequestPart("file") MultipartFile file,
                                            BindingResult result){
         try{
             if(result.hasErrors()){
@@ -34,6 +39,7 @@ public class ProductController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMessages);
             }
+            Product newProduct = productService.createProduct(productDTO);
             // file is optional
             List<MultipartFile> files = productDTO.getFiles();
             files = files == null ? new ArrayList<MultipartFile>(): files;
@@ -53,14 +59,6 @@ public class ProductController {
 
                 }
                 String filename = storeFile(file);
-                //Lưu vào bảng product_images
-//                {
-//                    "name": "Macbook Air 15 inch 2024",
-//                        "price": 812,
-//                        "thumbnail": "",
-//                        "description": "This is a test product",
-//                        "category_id": 1
-//                }
             }
             return ResponseEntity.ok("Product created successfully");
         } catch (Exception e){
@@ -85,29 +83,41 @@ public class ProductController {
     }
     //http://localhost:9090/api/v1/products?page=1&limit=10
     @GetMapping("")
-    public ResponseEntity<String> getProducts(
-//            @RequestParam("page") int page,
-//            @RequestParam("limit") int limit
+    public ResponseEntity<List<Product>> getProducts(
+            @RequestParam("page") int page,
+            @RequestParam("limit") int limit
     ){
-        return ResponseEntity.ok("Get Product here");
+
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<String> getProductById(@PathVariable("id") long productId){
-        return ResponseEntity.ok("Product with Id " + productId);
+    public ResponseEntity<?> getProductById(@PathVariable("id") long productId){
+        try{
+            return ResponseEntity.ok(productService.getProductById(productId));
+        }
+        catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable long id){
         //giong voi ResponseEntity.ok()
         //return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");
         //Dung cai binh thuong hay hon
+        productService.deleteProduct(id);
         return ResponseEntity.ok("Product deleted with id " + id);
     }
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable long id
             ,@Valid @ModelAttribute ProductDTO productDTO){
-
-
+        try{
+            productService.updateProduct(id, productDTO);
+        }
+        catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok("Product with id "+id+" is updated");
     }
 }
