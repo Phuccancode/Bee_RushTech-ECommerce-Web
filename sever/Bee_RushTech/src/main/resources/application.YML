@@ -1,4 +1,0 @@
-server:
-  port: 9090
-api:
-  prefix: api/v1
