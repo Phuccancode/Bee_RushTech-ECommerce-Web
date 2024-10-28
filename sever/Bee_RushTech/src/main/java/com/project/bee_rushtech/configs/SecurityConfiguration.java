@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/auth/login", "/auth/refresh").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/customer/register").permitAll()
-                                .anyRequest().authenticated())
+                                .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 // .exceptionHandling(
