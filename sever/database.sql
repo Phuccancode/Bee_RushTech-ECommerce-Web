@@ -102,3 +102,20 @@ CREATE TABLE order_details(
     FOREIGN KEY (product_id) REFERENCES products (id),
     FOREIGN KEY (order_id) REFERENCES orders (id)
 );
+
+CREATE TABLE carts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id CHAR(10) UNIQUE,
+    updated_at DATETIME,
+--    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE cart_items (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cart_id INT,
+    product_id INT,
+    quantity INT NOT NULL,
+    FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+);
