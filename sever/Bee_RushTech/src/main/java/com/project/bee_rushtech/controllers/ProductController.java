@@ -4,9 +4,15 @@ import com.project.bee_rushtech.dtos.ProductDTO;
 import com.project.bee_rushtech.dtos.ProductImageDTO;
 import com.project.bee_rushtech.models.Product;
 import com.project.bee_rushtech.models.ProductImage;
+import com.project.bee_rushtech.responses.ProductListResponse;
+import com.project.bee_rushtech.responses.ProductResponse;
 import com.project.bee_rushtech.services.IProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -96,11 +102,15 @@ public class ProductController {
 
     // http://localhost:9090/api/v1/products?page=1&limit=10
     @GetMapping("")
-    public ResponseEntity<List<Product>> getProducts(
+    public ResponseEntity<ProductListResponse> getProducts(
             @RequestParam("page") int page,
-            @RequestParam("limit") int limit) {
+            @RequestParam("limit") int limit
+    ){
+        PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+        Page<ProductResponse> productPage = productService.getAllProducts(pageRequest);
+        int totalPages = productPage.getTotalPages();
+        return ResponseEntity.ok(new ProductListResponse(productPage.getContent(), totalPages));
 
-        return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/{id}")

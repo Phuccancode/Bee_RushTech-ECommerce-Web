@@ -9,6 +9,7 @@ import com.project.bee_rushtech.models.ProductImage;
 import com.project.bee_rushtech.repositories.CategoryRepository;
 import com.project.bee_rushtech.repositories.ProductImageRepository;
 import com.project.bee_rushtech.repositories.ProductRepository;
+import com.project.bee_rushtech.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,9 +52,23 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public List<Product> getAllProducts() {
+    public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
         // Lấy danh sách sản phẩm theo trang(page) và giới hạn(limit)
-        return productRepository.findAll();
+        return productRepository.findAll(pageRequest).map(product -> {
+            ProductResponse productResponse = ProductResponse.builder()
+                                                .id(product.getId())
+                                                .name(product.getName())
+                                                .brand(product.getBrand())
+                                                .color(product.getColor())
+                                                .price(product.getPrice())
+                                                .importPrice(product.getImportPrice())
+                                                .thumbnail(product.getThumbnail())
+                                                .categoryId(product.getCategory().getId())
+                                                .build();
+            productResponse.setCreatedAt(product.getCreatedAt());
+            productResponse.setUpdatedAt(product.getUpdatedAt());
+            return productResponse;
+        });
     }
 
     @Override
