@@ -2,10 +2,6 @@ package com.project.bee_rushtech.models;
 
 import lombok.Getter;
 import lombok.Setter;
-import java.time.Instant;
-
-import org.springframework.security.access.method.P;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,5 +27,8 @@ public class User {
 
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String passwordResetToken;
 
 }
