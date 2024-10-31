@@ -32,6 +32,6 @@ public class ProductDTO {
     private Boolean available;
     private String color;
 
-    private List<MultipartFile> files;
+//    private List<MultipartFile> files;
 
 }

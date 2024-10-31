@@ -119,3 +119,12 @@ CREATE TABLE cart_items (
     FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
+CREATE TABLE product_images(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT,
+    FOREIGN KEY (product_id) REFERENCES products (id),
+    CONSTRAINT fk_product_images_product_id
+        FOREIGN KEY (product_id)
+        REFERENCES products (id) ON DELETE CASCADE,
+    image_url VARCHAR(300)
+);
