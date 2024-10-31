@@ -2,9 +2,12 @@ package com.project.bee_rushtech.services;
 
 
 import com.project.bee_rushtech.dtos.ProductDTO;
+import com.project.bee_rushtech.dtos.ProductImageDTO;
 import com.project.bee_rushtech.models.Category;
 import com.project.bee_rushtech.models.Product;
+import com.project.bee_rushtech.models.ProductImage;
 import com.project.bee_rushtech.repositories.CategoryRepository;
+import com.project.bee_rushtech.repositories.ProductImageRepository;
 import com.project.bee_rushtech.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +23,7 @@ import java.util.Optional;
 public class ProductService implements IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductImageRepository productImageRepository;
 
     @Override
     public Product createProduct(ProductDTO productDTO) throws DataNotFoundException {
@@ -89,5 +93,24 @@ public class ProductService implements IProductService {
     @Override
     public boolean existsByName(String name) {
         return productRepository.existsByName(name);
+    }
+
+    @Override
+    public ProductImage createProductImage(ProductImageDTO productImageDTO) throws Exception {
+        Product existingProduct = productRepository
+                .findById(productImageDTO.getProductId())
+                .orElseThrow(() ->
+                        new DataNotFoundException(
+                                "Cannot find product with id: " + productImageDTO.getProductId()));
+        ProductImage newProductImage = ProductImage.builder()
+                .product(existingProduct)
+                .imageUrl(productImageDTO.getImageUrl())
+                .build();
+        return productImageRepository.save(newProductImage);
+    }
+
+    @Override
+    public List<ProductImage> getProductImagesByProductId(long productId) {
+        return productImageRepository.findByProductId(productId);
     }
 }

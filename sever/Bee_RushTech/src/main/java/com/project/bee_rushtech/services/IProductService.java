@@ -1,6 +1,7 @@
 package com.project.bee_rushtech.services;
 
 import com.project.bee_rushtech.dtos.ProductDTO;
+import com.project.bee_rushtech.dtos.ProductImageDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import com.project.bee_rushtech.models.*;
@@ -14,4 +15,6 @@ public interface IProductService {
     Product updateProduct(long id, ProductDTO productDTO) throws Exception;
     void deleteProduct(long id);
     boolean existsByName(String name);
+    ProductImage createProductImage(ProductImageDTO productImageDTO) throws Exception;
+    List<ProductImage> getProductImagesByProductId(long productId);
 }
