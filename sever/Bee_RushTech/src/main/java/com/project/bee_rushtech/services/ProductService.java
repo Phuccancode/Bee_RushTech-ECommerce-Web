@@ -89,17 +89,13 @@ public class ProductService implements IProductService {
     public boolean existsByName(String name) {
         return productRepository.existsByName(name);
     }
-<<<<<<< HEAD
-}
-=======
 
     @Override
     public ProductImage createProductImage(ProductImageDTO productImageDTO) throws Exception {
         Product existingProduct = productRepository
                 .findById(productImageDTO.getProductId())
-                .orElseThrow(() ->
-                        new DataNotFoundException(
-                                "Cannot find product with id: " + productImageDTO.getProductId()));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Cannot find product with id: " + productImageDTO.getProductId()));
         ProductImage newProductImage = ProductImage.builder()
                 .product(existingProduct)
                 .imageUrl(productImageDTO.getImageUrl())
@@ -112,4 +108,3 @@ public class ProductService implements IProductService {
         return productImageRepository.findByProductId(productId);
     }
 }
->>>>>>> b262e1e95af320ba9f23b72960f70c748de18f57
