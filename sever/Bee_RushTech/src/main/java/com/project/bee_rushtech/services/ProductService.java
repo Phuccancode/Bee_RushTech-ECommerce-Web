@@ -1,5 +1,5 @@
-package com.project.bee_rushtech.services;
 
+package com.project.bee_rushtech.services;
 
 import com.project.bee_rushtech.dtos.ProductDTO;
 import com.project.bee_rushtech.dtos.ProductImageDTO;
@@ -30,9 +30,8 @@ public class ProductService implements IProductService {
     public Product createProduct(ProductDTO productDTO) throws DataNotFoundException {
         Category existingCategory = categoryRepository
                 .findById(productDTO.getCategoryId())
-                .orElseThrow(() ->
-                        new DataNotFoundException(
-                                "Cannot find category with id: " + productDTO.getCategoryId()));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Cannot find category with id: " + productDTO.getCategoryId()));
 
         Product newProduct = Product.builder()
                 .name(productDTO.getName())
@@ -46,12 +45,10 @@ public class ProductService implements IProductService {
         return productRepository.save(newProduct);
     }
 
-
     @Override
     public Product getProductById(long productId) throws Exception {
-        return productRepository.findById(productId).
-                orElseThrow(() -> new DataNotFoundException(
-                        "Cannot find product with id =" + productId));
+        return productRepository.findById(productId).orElseThrow(() -> new DataNotFoundException(
+                "Cannot find product with id =" + productId));
     }
 
     @Override
@@ -77,18 +74,16 @@ public class ProductService implements IProductService {
     @Override
     public Product updateProduct(
             long id,
-            ProductDTO productDTO
-    )
+            ProductDTO productDTO)
             throws Exception {
         Product existingProduct = getProductById(id);
         if (existingProduct != null) {
-            //copy các thuộc tính từ DTO -> Product
-            //Có thể sử dụng ModelMapper
+            // copy các thuộc tính từ DTO -> Product
+            // Có thể sử dụng ModelMapper
             Category existingCategory = categoryRepository
                     .findById(productDTO.getCategoryId())
-                    .orElseThrow(() ->
-                            new DataNotFoundException(
-                                    "Cannot find category with id: " + productDTO.getCategoryId()));
+                    .orElseThrow(() -> new DataNotFoundException(
+                            "Cannot find category with id: " + productDTO.getCategoryId()));
             existingProduct.setName(productDTO.getName());
             existingProduct.setCategory(existingCategory);
             existingProduct.setPrice(productDTO.getPrice());
@@ -114,9 +109,8 @@ public class ProductService implements IProductService {
     public ProductImage createProductImage(ProductImageDTO productImageDTO) throws Exception {
         Product existingProduct = productRepository
                 .findById(productImageDTO.getProductId())
-                .orElseThrow(() ->
-                        new DataNotFoundException(
-                                "Cannot find product with id: " + productImageDTO.getProductId()));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Cannot find product with id: " + productImageDTO.getProductId()));
         ProductImage newProductImage = ProductImage.builder()
                 .product(existingProduct)
                 .imageUrl(productImageDTO.getImageUrl())
