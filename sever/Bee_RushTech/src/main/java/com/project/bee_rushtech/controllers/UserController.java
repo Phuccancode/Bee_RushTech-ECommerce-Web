@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.errors.InvalidException;
-
 import jakarta.validation.Valid;
 
 @RestController
@@ -22,6 +21,7 @@ public class UserController {
     public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+
     }
 
     @PostMapping("/customer")

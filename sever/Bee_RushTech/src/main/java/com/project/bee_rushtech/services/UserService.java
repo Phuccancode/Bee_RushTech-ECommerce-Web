@@ -41,4 +41,13 @@ public class UserService {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
 
+    public void updatePasswordResetToken(String token, User user) {
+        user.setPasswordResetToken(token);
+        this.userRepository.save(user);
+    }
+
+    public User getUserByPasswordResetToken(String token) {
+        return this.userRepository.findByPasswordResetToken(token);
+    }
+
 }
