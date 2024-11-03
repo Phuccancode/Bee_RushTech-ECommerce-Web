@@ -9,6 +9,7 @@ import com.project.bee_rushtech.repositories.CartItemRepository;
 import com.project.bee_rushtech.repositories.CartRepository;
 import com.project.bee_rushtech.repositories.ProductRepository;
 import java.util.Optional;
+import java.util.List;
 
 @Service
 public class CartService {
@@ -61,5 +62,8 @@ public class CartService {
         }
 
         cartItemRepository.delete(cartItemOpt.get());
+    }
+    public List<CartItem> getCartItemsByUserId(Long userId) {
+        return cartItemRepository.findByUserId(userId);
     }
 }
