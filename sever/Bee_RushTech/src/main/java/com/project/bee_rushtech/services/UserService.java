@@ -49,5 +49,8 @@ public class UserService {
     public User getUserByPasswordResetToken(String token) {
         return this.userRepository.findByPasswordResetToken(token);
     }
+    public User findById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
 
 }
