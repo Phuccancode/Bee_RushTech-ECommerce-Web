@@ -1,5 +1,6 @@
 package com.project.bee_rushtech.controllers;
 
+import com.github.javafaker.Faker;
 import com.project.bee_rushtech.dtos.ProductDTO;
 import com.project.bee_rushtech.dtos.ProductImageDTO;
 import com.project.bee_rushtech.models.Product;
@@ -141,5 +142,27 @@ public class ProductController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("Product with id " + id + " is updated");
+    }
+    @PostMapping("/generateFakeProducts")
+    public ResponseEntity<String> generateFakeProducts(){
+        Faker faker = new Faker();
+        for(int i = 0; i < 5000; i++){
+            String productName =faker.commerce().productName();
+            if(productService.existsByName(productName)){
+                continue;
+            }
+            ProductDTO productDTO = ProductDTO.builder()
+                    .name(productName)
+                    .price((float)faker.number().numberBetween(50_000, 50_000_000))
+                    .thumbnail("")
+                    .description(faker.lorem().sentence())
+                    .build();
+            try {
+                productService.createProduct(productDTO);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+        }
+        return ResponseEntity.ok("Fake products generated successfully");
     }
 }

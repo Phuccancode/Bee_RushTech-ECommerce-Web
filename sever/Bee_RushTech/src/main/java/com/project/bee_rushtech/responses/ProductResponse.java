@@ -3,6 +3,8 @@ package com.project.bee_rushtech.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
