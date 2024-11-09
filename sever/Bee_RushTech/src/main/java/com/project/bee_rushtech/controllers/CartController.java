@@ -1,6 +1,5 @@
 package com.project.bee_rushtech.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.project.bee_rushtech.models.Cart;
@@ -9,8 +8,11 @@ import com.project.bee_rushtech.services.CartService;
 @RestController
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
 
     @PostMapping("/customer/cart")
     public ResponseEntity<Cart> addProductToCart(@RequestParam Long cartId,

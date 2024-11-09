@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
