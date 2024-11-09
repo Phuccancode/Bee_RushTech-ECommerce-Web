@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/orders")
 public class OrderController {
 
     @Autowired
@@ -20,11 +19,10 @@ public class OrderController {
     @Autowired
     private CartService cartService;
 
-    @PostMapping("/create/{userId}")
-    public ResponseEntity<Order> createOrder(@PathVariable Long userId) {
+    @PostMapping("/customer/order")
+    public ResponseEntity<Order> createOrder(@RequestParam Long userId) {
         // Lấy các CartItem của người dùng từ CartService
-        List<CartItem> cartItems = cartService.getCartItemsByUserId(userId);
-
+        List<CartItem> cartItems = cartService.getAllCartItems(userId);
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(null); // Kiểm tra xem giỏ hàng có trống không
         }
