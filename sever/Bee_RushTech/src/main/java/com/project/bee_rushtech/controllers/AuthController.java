@@ -1,7 +1,6 @@
 package com.project.bee_rushtech.controllers;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties.System;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -19,10 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.bee_rushtech.dtos.LoginDTO;
-import com.project.bee_rushtech.dtos.ResLoginDTO;
 import com.project.bee_rushtech.dtos.ResetPasswordDTO;
 import com.project.bee_rushtech.models.Email;
 import com.project.bee_rushtech.models.User;
+import com.project.bee_rushtech.responses.LoginResponse;
+import com.project.bee_rushtech.responses.ResetPasswordResponse;
 import com.project.bee_rushtech.services.EmailService;
 import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.SecurityUtil;
@@ -58,7 +58,8 @@ public class AuthController {
         }
 
         @PostMapping("/auth/login")
-        public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
+        @ApiMessage("Login successfully")
+        public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTO loginDTO) {
 
                 // Nạp input gồm username/password vào Security
 
@@ -72,9 +73,9 @@ public class AuthController {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication); // set authentication vào
                                                                                       // SecurityContext
-                ResLoginDTO resLoginDTO = new ResLoginDTO();
+                LoginResponse resLoginDTO = new LoginResponse();
                 User userDB = this.userService.getUserByEmail(loginDTO.getUsername());
-                ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userDB.getId(), userDB.getEmail(),
+                LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
                                 userDB.getFirstName());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(authentication.getName(),
@@ -100,23 +101,25 @@ public class AuthController {
 
         @GetMapping("/auth/account")
         @ApiMessage("Get account successfully")
-        public ResponseEntity<ResLoginDTO.UserLogin> getAccount() {
+        public ResponseEntity<LoginResponse.UserLogin> getAccount() throws InvalidException {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
                                 : "";
 
                 User currentUser = this.userService.getUserByEmail(email);
-                ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin();
+                LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin();
                 if (currentUser != null) {
                         userLogin.setId(currentUser.getId());
                         userLogin.setEmail(currentUser.getEmail());
                         userLogin.setName(currentUser.getFirstName());
+                } else {
+                        throw new InvalidException("Not found user have login");
                 }
                 return ResponseEntity.ok().body(userLogin);
         }
 
         @GetMapping("/auth/refresh")
         @ApiMessage("Get User by refresh token")
-        public ResponseEntity<ResLoginDTO> getRefreshToken(@CookieValue(name = "refresh_token") String refreshToken)
+        public ResponseEntity<LoginResponse> getRefreshToken(@CookieValue(name = "refresh_token") String refreshToken)
                         throws InvalidException {
                 Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(refreshToken);
                 String email = tokenDecoded.getSubject();
@@ -126,9 +129,9 @@ public class AuthController {
                         throw new InvalidException("Refresh token is invalid");
                 }
 
-                ResLoginDTO resLoginDTO = new ResLoginDTO();
+                LoginResponse resLoginDTO = new LoginResponse();
                 User userDB = this.userService.getUserByEmail(email);
-                ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userDB.getId(), userDB.getEmail(),
+                LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
                                 userDB.getFirstName());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(email, resLoginDTO.getUser());
@@ -174,26 +177,40 @@ public class AuthController {
         }
 
         @PostMapping("/auth/resetpassword")
-        public ResponseEntity<User> resetPassword(HttpServletRequest request, @RequestParam("email") String email)
+        public ResponseEntity<ResetPasswordResponse> resetPassword(HttpServletRequest request,
+                        @RequestParam("email") String email)
                         throws InvalidException {
                 User currentUser = this.userService.getUserByEmail(email);
                 if (currentUser == null) {
                         throw new InvalidException("User not found");
                 }
                 String token = UUID.randomUUID().toString().replace("-", "");
+                ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
+                resetPasswordResponse.setToken(token);
                 currentUser.setPasswordResetToken(token);
                 this.userService.updatePasswordResetToken(token, currentUser);
                 String resetUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
                                 + "/customer/resetpassword?token=" + token;
 
-                Email newEmail = new Email(email, "Reset Password",
-                                "To reset your password, click the link below:\n" + resetUrl);
+                Email newEmail = new Email(email, "[BeeRushTech] Reset your password",
+                                "Dear " + currentUser.getFirstName() + ",\n\n"
+                                                + "We noticed that you forgot your login password and you are requesting a new password for the account associated with "
+                                                + email + ".\n\n"
+                                                + "Please click the link below to reset your password:\n\n" + resetUrl
+                                                + "\n\n"
+                                                + "Yours,\n"
+                                                + "The Bee RushTech team\n\n"
+                                                + "Please contact us in the following ways:\n"
+                                                + "Email: " + "beerushtech@gmail.com\n"
+                                                + "Tel: 0987654321\n"
+                                                + "Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.\n");
                 this.emailService.sendEmail(newEmail);
-                return ResponseEntity.status(HttpStatus.OK).body(currentUser);
+                return ResponseEntity.status(HttpStatus.OK).body(resetPasswordResponse);
         }
 
         @PutMapping("/auth/resetpassword")
-        public ResponseEntity<User> resetPassword(@Valid @RequestParam("token") String token,
+        @ApiMessage("Reset password successfully")
+        public ResponseEntity<Void> resetPassword(@Valid @RequestParam("token") String token,
                         @RequestBody ResetPasswordDTO resetPasswordDTOpassword)
                         throws InvalidException {
                 User currentUser = this.userService.getUserByPasswordResetToken(token);
@@ -208,8 +225,8 @@ public class AuthController {
                 currentUser.setPassword(hashPassword);
                 currentUser.setPasswordResetToken(null);
                 currentUser.setRefreshToken(null);
-                User updatedUser = this.userService.handleUpdateUser(currentUser);
-                return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+                this.userService.handleUpdateUser(currentUser);
+                return ResponseEntity.status(HttpStatus.OK).body(null);
         }
 
 }
