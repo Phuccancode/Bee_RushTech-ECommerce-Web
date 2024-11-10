@@ -10,6 +10,8 @@ import com.project.bee_rushtech.models.Product;
 import com.project.bee_rushtech.repositories.CartItemRepository;
 import com.project.bee_rushtech.repositories.CartRepository;
 import com.project.bee_rushtech.repositories.ProductRepository;
+import com.project.bee_rushtech.utils.errors.InvalidException;
+
 import java.util.Optional;
 import java.util.List;
 
@@ -27,7 +29,13 @@ public class CartService {
         this.cartItemRepository = cartItemRepository;
     }
 
-    public Cart addProductToCart(Long cartId, Long productId, Integer quantity) {
+    public void createCart(Long userId) {
+        Cart cart = new Cart();
+        cart.setId(userId);
+        cartRepository.save(cart);
+    }
+
+    public CartItem addProductToCart(Long cartId, Long productId, Long quantity) {
         Optional<Product> productOpt = productRepository.findById(productId);
         Optional<Cart> cartOpt = cartRepository.findById(cartId);
 
@@ -40,22 +48,17 @@ public class CartService {
         cartItem.setProduct(productOpt.get());
         cartItem.setQuantity(quantity);
 
-        cartItemRepository.save(cartItem);
-        return cartOpt.get();
+        return this.cartItemRepository.save(cartItem);
     }
 
-    public Cart updateCartItem(Long cartItemId, Integer quantity) {
-        Optional<CartItem> cartItemOpt = cartItemRepository.findById(cartItemId);
-
-        if (cartItemOpt.isEmpty()) {
-            throw new RuntimeException("Cart item not found!");
+    public void updateCartItem(Long cartId, Long cartItemId, Long quantity) throws InvalidException {
+        CartItem cartItem = cartItemRepository.findByIdAndCartId(cartItemId, cartId);
+        System.out.println(" cartId: " + cartId + " cartItemId: " + cartItemId);
+        if (cartItem == null) {
+            throw new InvalidException("Cart item not found!");
         }
-
-        CartItem cartItem = cartItemOpt.get();
         cartItem.setQuantity(quantity);
         cartItemRepository.save(cartItem);
-
-        return cartItem.getCart();
     }
 
     public void removeProductFromCart(Long cartItemId) {
@@ -68,7 +71,15 @@ public class CartService {
         cartItemRepository.delete(cartItemOpt.get());
     }
 
-    public List<CartItem> getAllCartItems(Long userId) {
-        return cartItemRepository.findAllById(userId);
+    public List<CartItem> getAllCartItems(Long cartId) {
+        return cartItemRepository.findAllByCartId(cartId);
+    }
+
+    public boolean existsByUserId(Long userId) {
+        return cartRepository.existsByUserId(userId);
+    }
+
+    public Cart getByUserId(Long userId) {
+        return cartRepository.findByUserId(userId);
     }
 }
