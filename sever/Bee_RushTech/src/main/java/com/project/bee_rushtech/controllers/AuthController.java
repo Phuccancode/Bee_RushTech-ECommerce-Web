@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +39,7 @@ import java.util.UUID;
 import java.util.Objects;
 
 @RestController
+@RequestMapping("${api.prefix}/auth")
 public class AuthController {
         private final AuthenticationManagerBuilder authenticationManagerBuilder;
         private final SecurityUtil securityUtil;
@@ -57,7 +59,7 @@ public class AuthController {
                 this.passwordEncoder = passwordEncoder;
         }
 
-        @PostMapping("/auth/login")
+        @PostMapping("/login")
         @ApiMessage("Login successfully")
         public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTO loginDTO) {
 
@@ -76,7 +78,7 @@ public class AuthController {
                 LoginResponse resLoginDTO = new LoginResponse();
                 User userDB = this.userService.getUserByEmail(loginDTO.getUsername());
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
-                                userDB.getFirstName());
+                                userDB.getFullName());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(authentication.getName(),
                                 resLoginDTO.getUser());
@@ -99,7 +101,7 @@ public class AuthController {
                                 .body(resLoginDTO);
         }
 
-        @GetMapping("/auth/account")
+        @GetMapping("/getaccount")
         @ApiMessage("Get account successfully")
         public ResponseEntity<LoginResponse.UserLogin> getAccount() throws InvalidException {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
@@ -110,14 +112,14 @@ public class AuthController {
                 if (currentUser != null) {
                         userLogin.setId(currentUser.getId());
                         userLogin.setEmail(currentUser.getEmail());
-                        userLogin.setName(currentUser.getFirstName());
+                        userLogin.setName(currentUser.getFullName());
                 } else {
                         throw new InvalidException("Not found user have login");
                 }
                 return ResponseEntity.ok().body(userLogin);
         }
 
-        @GetMapping("/auth/refresh")
+        @GetMapping("/refresh")
         @ApiMessage("Get User by refresh token")
         public ResponseEntity<LoginResponse> getRefreshToken(@CookieValue(name = "refresh_token") String refreshToken)
                         throws InvalidException {
@@ -132,7 +134,7 @@ public class AuthController {
                 LoginResponse resLoginDTO = new LoginResponse();
                 User userDB = this.userService.getUserByEmail(email);
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
-                                userDB.getFirstName());
+                                userDB.getFullName());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(email, resLoginDTO.getUser());
 
@@ -154,7 +156,7 @@ public class AuthController {
                                 .body(resLoginDTO);
         }
 
-        @PostMapping("/auth/logout")
+        @PostMapping("/logout")
         @ApiMessage("Logout successfully")
         public ResponseEntity<Void> logout() throws InvalidException {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
@@ -176,7 +178,7 @@ public class AuthController {
                                 .body(null);
         }
 
-        @PostMapping("/auth/resetpassword")
+        @PostMapping("/resetpassword")
         public ResponseEntity<ResetPasswordResponse> resetPassword(HttpServletRequest request,
                         @RequestParam("email") String email)
                         throws InvalidException {
@@ -193,7 +195,7 @@ public class AuthController {
                                 + "/customer/resetpassword?token=" + token;
 
                 Email newEmail = new Email(email, "[BeeRushTech] Reset your password",
-                                "Dear " + currentUser.getFirstName() + ",\n\n"
+                                "Dear " + currentUser.getFullName() + ",\n\n"
                                                 + "We noticed that you forgot your login password and you are requesting a new password for the account associated with "
                                                 + email + ".\n\n"
                                                 + "Please click the link below to reset your password:\n\n" + resetUrl
@@ -208,7 +210,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.OK).body(resetPasswordResponse);
         }
 
-        @PutMapping("/auth/resetpassword")
+        @PutMapping("/resetpassword")
         @ApiMessage("Reset password successfully")
         public ResponseEntity<Void> resetPassword(@Valid @RequestParam("token") String token,
                         @RequestBody ResetPasswordDTO resetPasswordDTOpassword)

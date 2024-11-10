@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("${api.prefix}/customer")
 public class OrderController {
 
     @Autowired
@@ -19,7 +20,7 @@ public class OrderController {
     @Autowired
     private CartService cartService;
 
-    @PostMapping("/customer/order")
+    @PostMapping("/order")
     public ResponseEntity<Order> createOrder(@RequestParam Long userId) {
         // Lấy các CartItem của người dùng từ CartService
         List<CartItem> cartItems = cartService.getAllCartItems(userId);

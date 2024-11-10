@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.bee_rushtech.models.User;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
+@RequestMapping("${api.prefix}")
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -53,12 +55,11 @@ public class UserController {
         if (currentUser == null) {
             throw new InvalidException("User not found");
         }
-        if (user.getFirstName() == null || user.getLastName() == null || user.getPhoneNumber() == null
+        if (user.getFullName() == null || user.getPhoneNumber() == null
                 || user.getAddress() == null) {
             throw new InvalidException("Please fill all fields");
         }
-        currentUser.setFirstName(user.getFirstName());
-        currentUser.setLastName(user.getLastName());
+        currentUser.setFullName(user.getFullName());
         currentUser.setPhoneNumber(user.getPhoneNumber());
         currentUser.setAddress(user.getAddress());
         User updatedUser = this.userService.handleUpdateUser(currentUser);
