@@ -28,16 +28,16 @@ CREATE TABLE users(
 
 
 
-CREATE TABLE tokens(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    token VARCHAR(255) UNIQUE NOT NULL,
-    token_type VARCHAR(50) NOT NULL,
-    expiration_date DATETIME,
-    revoked TINYINT(1) NOT NULL,
-    expired TINYINT(1) NOT NULL,
-    user_id CHAR(10),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
+--CREATE TABLE tokens(
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    token VARCHAR(255) UNIQUE NOT NULL,
+--    token_type VARCHAR(50) NOT NULL,
+--    expiration_date DATETIME,
+--    revoked TINYINT(1) NOT NULL,
+--    expired TINYINT(1) NOT NULL,
+--    user_id CHAR(10),
+--    FOREIGN KEY (user_id) REFERENCES users(id)
+--);
 
 -- hỗ trợ đăng nhập từ Facebook và Google
 CREATE TABLE social_accounts(
