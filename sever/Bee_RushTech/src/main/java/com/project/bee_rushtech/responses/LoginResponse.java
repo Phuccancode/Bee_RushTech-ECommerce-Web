@@ -1,4 +1,4 @@
-package com.project.bee_rushtech.dtos;
+package com.project.bee_rushtech.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ResLoginDTO {
+public class LoginResponse {
     private String access_token;
     private UserLogin user;
 

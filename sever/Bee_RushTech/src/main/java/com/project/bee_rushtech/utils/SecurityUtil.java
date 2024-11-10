@@ -26,7 +26,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 
 import com.nimbusds.jose.util.Base64;
-import com.project.bee_rushtech.dtos.ResLoginDTO;
+import com.project.bee_rushtech.responses.LoginResponse;
 
 @Service
 public class SecurityUtil {
@@ -43,7 +43,7 @@ public class SecurityUtil {
     @Value("${project.jwt.access-token-validity-in-seconds}")
     private long jwtAccessExpiration;
 
-    public String createAccessToken(String email, ResLoginDTO.UserLogin resLoginDTO) {
+    public String createAccessToken(String email, LoginResponse.UserLogin resLoginDTO) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.jwtAccessExpiration, ChronoUnit.SECONDS);
 
@@ -64,7 +64,7 @@ public class SecurityUtil {
     @Value("${project.jwt.refresh-token-validity-in-seconds}")
     private long jwtRefreshExpiration;
 
-    public String createRefreshToken(String email, ResLoginDTO resLoginDTO) {
+    public String createRefreshToken(String email, LoginResponse resLoginDTO) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.jwtRefreshExpiration, ChronoUnit.SECONDS);
 

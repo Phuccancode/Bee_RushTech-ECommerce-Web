@@ -1,7 +1,7 @@
 package com.project.bee_rushtech.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.bee_rushtech.models.RestResponse;
+import com.project.bee_rushtech.responses.RestResponse;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

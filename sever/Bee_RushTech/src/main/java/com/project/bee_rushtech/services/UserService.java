@@ -1,5 +1,7 @@
 package com.project.bee_rushtech.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.project.bee_rushtech.models.User;
@@ -49,8 +51,13 @@ public class UserService {
     public User getUserByPasswordResetToken(String token) {
         return this.userRepository.findByPasswordResetToken(token);
     }
+
     public User findById(Long userId) {
         return userRepository.findById(userId).orElse(null);
+    }
+
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
     }
 
 }
