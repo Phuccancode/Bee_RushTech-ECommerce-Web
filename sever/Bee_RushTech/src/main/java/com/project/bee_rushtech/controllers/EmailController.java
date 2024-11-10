@@ -21,7 +21,6 @@ public class EmailController {
     @PostMapping("/email")
     public ResponseEntity<Void> sendEmail(@RequestBody Email email) {
         this.emailService.sendEmail(email);
-
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

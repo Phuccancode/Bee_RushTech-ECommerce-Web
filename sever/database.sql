@@ -1,16 +1,20 @@
+create database shopapp;
 
-CREATE DATABASE shopapp;
-USE shopapp;
--- Khách hàng khi muốn mua hàng => phải đăng ký tài khoản => bảng users
+use shopapp;
+
+
+
+
 CREATE TABLE roles(
     id INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL 
 );
 
 CREATE TABLE users(
-    id CHAR(10) PRIMARY KEY,
-    fullname VARCHAR(100) DEFAULT '',
+    id INT PRIMARY KEY auto_increment,
+    full_name VARCHAR(100) DEFAULT '',
     phone_number CHAR(10) NOT NULL,
+    email VARCHAR (100) not null,
     address VARCHAR(200) DEFAULT '',
     password VARCHAR(100) NOT NULL DEFAULT '',
     created_at DATETIME,
@@ -20,21 +24,11 @@ CREATE TABLE users(
     facebook_account_id INT DEFAULT 0,
     google_account_id INT DEFAULT 0,
     role_id INT,
+    refresh_token mediumtext,
+    password_reset_token mediumtext,
     FOREIGN KEY (role_id) REFERENCES roles (id)
 );
 
-
-
-CREATE TABLE tokens(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    token VARCHAR(255) UNIQUE NOT NULL,
-    token_type VARCHAR(50) NOT NULL,
-    expiration_date DATETIME,
-    revoked TINYINT(1) NOT NULL,
-    expired TINYINT(1) NOT NULL,
-    user_id CHAR(10),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
 
 -- hỗ trợ đăng nhập từ Facebook và Google
 CREATE TABLE social_accounts(
@@ -43,7 +37,7 @@ CREATE TABLE social_accounts(
     provider_id CHAR(50) NOT NULL,
     email VARCHAR(150) NOT NULL COMMENT 'Email tài khoản',
     name VARCHAR(100) NOT NULL COMMENT 'Tên người dùng',
-    user_id CHAR(10),
+    user_id INT,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -72,7 +66,7 @@ CREATE TABLE products (
 -- Đặt hàng - orders
 CREATE TABLE orders(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id CHAR(10),
+    user_id INT,
     fullname VARCHAR(100) DEFAULT '',
     email VARCHAR(100) DEFAULT '',
     phone_number CHAR(10) NOT NULL,
@@ -105,7 +99,7 @@ CREATE TABLE order_details(
 
 CREATE TABLE carts (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id CHAR(10) UNIQUE,
+    user_id INT UNIQUE,
     updated_at DATETIME,
 --    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -117,7 +111,7 @@ CREATE TABLE cart_items (
     product_id INT,
     quantity INT NOT NULL,
     FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 CREATE TABLE product_images(
     id INT PRIMARY KEY AUTO_INCREMENT,

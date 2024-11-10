@@ -12,7 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.project.bee_rushtech.models.RestResponse;
+import com.project.bee_rushtech.responses.RestResponse;
 
 import java.util.stream.Collectors;
 

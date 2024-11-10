@@ -2,6 +2,8 @@ package com.project.bee_rushtech.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.github.javafaker.Cat;
 import com.project.bee_rushtech.models.Cart;
 import com.project.bee_rushtech.models.CartItem;
 import com.project.bee_rushtech.models.Product;
@@ -14,14 +16,16 @@ import java.util.List;
 @Service
 public class CartService {
 
-    @Autowired
-    private CartRepository cartRepository;
+    private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
+    private final CartItemRepository cartItemRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private CartItemRepository cartItemRepository;
+    public CartService(CartRepository cartRepository, ProductRepository productRepository,
+            CartItemRepository cartItemRepository) {
+        this.cartRepository = cartRepository;
+        this.productRepository = productRepository;
+        this.cartItemRepository = cartItemRepository;
+    }
 
     public Cart addProductToCart(Long cartId, Long productId, Integer quantity) {
         Optional<Product> productOpt = productRepository.findById(productId);
@@ -63,7 +67,8 @@ public class CartService {
 
         cartItemRepository.delete(cartItemOpt.get());
     }
-    public List<CartItem> getCartItemsByUserId(Long userId) {
-        return cartItemRepository.findByUserId(userId);
+
+    public List<CartItem> getAllCartItems(Long userId) {
+        return cartItemRepository.findAllById(userId);
     }
 }
