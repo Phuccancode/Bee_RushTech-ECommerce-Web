@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.bee_rushtech.dtos.ChangePasswordDTO;
 import com.project.bee_rushtech.models.User;
+import com.project.bee_rushtech.responses.ChangePasswordResponse;
 import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
@@ -50,8 +52,11 @@ public class UserController {
     }
 
     @PutMapping("/customer")
-    public ResponseEntity<User> update(@Valid @RequestBody User user) throws InvalidException {
-        User currentUser = this.userService.getUserByEmail(user.getEmail());
+    public ResponseEntity<User> update(@Valid @CookieValue(name = "refresh_token") String token, @RequestBody User user)
+            throws InvalidException {
+        Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
+        String email = tokenDecoded.getSubject();
+        User currentUser = this.userService.getUserByEmail(email);
         if (currentUser == null) {
             throw new InvalidException("User not found");
         }
@@ -70,7 +75,6 @@ public class UserController {
     @ApiMessage("Get information successfully")
     public ResponseEntity<User> getUserByEmail(@CookieValue(name = "refresh_token") String token)
             throws InvalidException {
-        System.out.println(token);
         Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
         String email = tokenDecoded.getSubject();
         User user = this.userService.getUserByRefreshTokenAndEmail(token, email);
@@ -93,6 +97,30 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = this.userService.findAllUsers();
         return ResponseEntity.status(HttpStatus.OK).body(users);
+    }
+
+    @PutMapping("customer/changepassword")
+    @ApiMessage("Change password successfully")
+    public ResponseEntity<ChangePasswordResponse> changePassword(
+            @Valid @CookieValue(name = "refresh_token") String token, @RequestBody ChangePasswordDTO changePassword)
+            throws InvalidException {
+        Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
+        String email = tokenDecoded.getSubject();
+        User currentUser = this.userService.getUserByEmail(email);
+        if (currentUser == null) {
+            throw new InvalidException("User not found");
+        }
+        if (!this.passwordEncoder.matches(changePassword.getOldPassword(), currentUser.getPassword())) {
+            throw new InvalidException("Old password is incorrect");
+        }
+        if (!changePassword.getNewPassword().equals(changePassword.getConfirmPassword())) {
+            throw new InvalidException("New password and confirm password are not the same");
+        }
+        String hashPassword = this.passwordEncoder.encode(changePassword.getNewPassword());
+        currentUser.setPassword(hashPassword);
+        this.userService.handleUpdateUser(currentUser);
+        ChangePasswordResponse response = new ChangePasswordResponse(hashPassword);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

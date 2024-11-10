@@ -69,6 +69,6 @@ public class CartService {
     }
 
     public List<CartItem> getAllCartItems(Long userId) {
-        return cartItemRepository.findAllByUserId(userId);
+        return cartItemRepository.findAllById(userId);
     }
 }

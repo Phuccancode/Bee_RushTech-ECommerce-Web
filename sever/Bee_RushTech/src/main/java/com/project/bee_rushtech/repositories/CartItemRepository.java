@@ -5,5 +5,5 @@ import com.project.bee_rushtech.models.CartItem;
 import java.util.List;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
-    List<CartItem> findAllByUserId(Long userId); // Phương thức để tìm các mục giỏ hàng theo userId
+    List<CartItem> findAllById(Long id); // Phương thức để tìm các mục giỏ hàng theo userId
 }

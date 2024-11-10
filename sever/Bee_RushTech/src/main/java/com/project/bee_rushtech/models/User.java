@@ -19,7 +19,7 @@ import java.util.Date;
 @Table(name = "users")
 @Getter
 @Setter
-public class User {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,15 +30,12 @@ public class User {
     private String address;
     private String phoneNumber;
 
-    private Instant createdAt;
-    private Instant updatedAt;
-
     private Boolean isActive;
 
     private Date dateOfBirth;
 
-    private String facebookId;
-    private String googleId;
+    private String facebookAccountId;
+    private String googleAccountId;
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
 
@@ -48,5 +45,4 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "roleId")
     private Role role;
-
 }

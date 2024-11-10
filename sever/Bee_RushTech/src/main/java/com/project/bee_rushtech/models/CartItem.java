@@ -3,10 +3,11 @@ package com.project.bee_rushtech.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "cart_items")
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
