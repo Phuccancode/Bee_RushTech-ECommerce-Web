@@ -59,6 +59,17 @@ public class AuthController {
                 this.passwordEncoder = passwordEncoder;
         }
 
+        @PostMapping("/register")
+        public ResponseEntity<User> register(@Valid @RequestBody User user) throws InvalidException {
+                if (this.userService.checkUserExists(user.getEmail())) {
+                        throw new InvalidException("Email is already taken");
+                }
+                String hashPassword = this.passwordEncoder.encode(user.getPassword());
+                user.setPassword(hashPassword);
+                User newUser = this.userService.handleCreateUser(user);
+                return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+        }
+
         @PostMapping("/login")
         @ApiMessage("Login successfully")
         public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTO loginDTO) {

@@ -37,7 +37,7 @@ public class CartController {
 
     @PostMapping("/cart")
     public ResponseEntity<AddItemToCartResponse> addProductToCart(@RequestBody CartItemDTO cartItemDTO,
-            @CookieValue(name = "refresh_token") String token) {
+            @CookieValue(name = "refresh_token") String token) throws InvalidException {
 
         Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
         String userId_String = tokenDecoded.getId();
@@ -56,7 +56,8 @@ public class CartController {
     }
 
     @GetMapping("/cart")
-    public ResponseEntity<List<CartItemResponse>> getAllCarts(@CookieValue(name = "refresh_token") String token) {
+    public ResponseEntity<List<CartItemResponse>> getAllCarts(@CookieValue(name = "refresh_token") String token)
+            throws InvalidException {
         Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
         String userId_String = tokenDecoded.getId();
         Long userId = Long.parseLong(userId_String);

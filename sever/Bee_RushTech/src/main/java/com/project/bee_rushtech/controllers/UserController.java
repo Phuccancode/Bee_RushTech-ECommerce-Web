@@ -40,22 +40,10 @@ public class UserController {
 
     }
 
-    @PostMapping("/customer")
-    public ResponseEntity<User> register(@Valid @RequestBody User user) throws InvalidException {
-        if (this.userService.checkUserExists(user.getEmail())) {
-            throw new InvalidException("Email is already taken");
-        }
-        String hashPassword = this.passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashPassword);
-        User newUser = this.userService.handleCreateUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
-    }
-
-    @PutMapping("/customer")
+    @PutMapping("/user/profile")
     public ResponseEntity<User> update(@Valid @CookieValue(name = "refresh_token") String token, @RequestBody User user)
             throws InvalidException {
-        Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
-        String email = tokenDecoded.getSubject();
+        String email = this.securityUtil.getEmailFromToken(token);
         User currentUser = this.userService.getUserByEmail(email);
         if (currentUser == null) {
             throw new InvalidException("User not found");
@@ -71,12 +59,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
-    @GetMapping("/customer")
+    @GetMapping("/user/profile")
     @ApiMessage("Get information successfully")
     public ResponseEntity<User> getUserByEmail(@CookieValue(name = "refresh_token") String token)
             throws InvalidException {
-        Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
-        String email = tokenDecoded.getSubject();
+        String email = this.securityUtil.getEmailFromToken(token);
         User user = this.userService.getUserByRefreshTokenAndEmail(token, email);
         if (user == null) {
             throw new InvalidException("You are not authorized");
@@ -85,7 +72,12 @@ public class UserController {
     }
 
     @GetMapping("/customer/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(@CookieValue(name = "refresh_token") String token, @PathVariable Long id)
+            throws InvalidException {
+        String role = this.securityUtil.getRolesFromToken(token);
+        if (!role.equals("ADMIN")) {
+            throw new InvalidException("You are not authorized");
+        }
         User user = this.userService.findById(id);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -93,19 +85,23 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    @GetMapping("/admin/customer")
-    public ResponseEntity<List<User>> getAllUsers() {
+    @GetMapping("/customer")
+    public ResponseEntity<List<User>> getAllUsers(@CookieValue(name = "refresh_token") String token)
+            throws InvalidException {
+        String role = this.securityUtil.getRolesFromToken(token);
+        if (!role.equals("ADMIN")) {
+            throw new InvalidException("You are not authorized");
+        }
         List<User> users = this.userService.findAllUsers();
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
-    @PutMapping("customer/changepassword")
+    @PutMapping("/user/change-password")
     @ApiMessage("Change password successfully")
     public ResponseEntity<ChangePasswordResponse> changePassword(
             @Valid @CookieValue(name = "refresh_token") String token, @RequestBody ChangePasswordDTO changePassword)
             throws InvalidException {
-        Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(token);
-        String email = tokenDecoded.getSubject();
+        String email = this.securityUtil.getEmailFromToken(token);
         User currentUser = this.userService.getUserByEmail(email);
         if (currentUser == null) {
             throw new InvalidException("User not found");
