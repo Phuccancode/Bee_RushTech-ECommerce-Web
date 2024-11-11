@@ -55,6 +55,7 @@ public class SecurityUtil {
             .expiresAt(validity) 
             .subject(email) 
             .claim("user", resLoginDTO) 
+            .claim("jti", resLoginDTO.getId())
             .claim("permissions", authorities)
             .build(); 
  
@@ -73,6 +74,7 @@ public class SecurityUtil {
             .issuedAt(now) 
             .expiresAt(validity) 
             .subject(email) 
+            .claim("jti", resLoginDTO.getUser().getId())
             .claim("user", resLoginDTO.getUser()) 
             .build(); 
  
