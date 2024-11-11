@@ -1,67 +1,84 @@
 package com.project.bee_rushtech.models;
 
+
+
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
 
+//Xác định nó là thực thể
 @Entity
-@Table(name = "orders")
+//Bảng trong db là categories mà class chúng ta lại là Category
+// --> dùng @Table để ánh xạ
+@Table(name= "orders")
+@Data //toString
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Order {
-
-    @Id
+    @Id //primary key
+    // No same instance --> when add a new instance --> auto increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fullname", length = 100)
+    private String fullName;
+
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Column(name= "phone_number", nullable = false, length = 100)
+    private String phoneNumber;
+
+    @Column(name= "shipping_address", nullable = false, length = 100)
+    private String shippingAddress;
+
+    @Column(name = "note", length = 100)
+    private String note;
+
+    @Column(name ="order_date")
     private Date orderDate;
 
+    @Column(name="status")
     private String status;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems;
+    @Column(name = "total_money")
+    private Float totalMoney;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    @Column(name = "shipping_method")
+    private String shippingMethod;
+
+    @Column(name = "shipping_date")
+    private LocalDate shippingDate;
+
+    @Column(name = "tracking_number")
+    private String trackingNumber;
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "active")
+    private Boolean active;//thuộc về admin
+
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int LENGTH = 20;
+
+    public static String generateTrackingNumber() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder trackingNumber = new StringBuilder(LENGTH);
+        for (int i = 0; i < LENGTH; i++) {
+            trackingNumber.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+        }
+        return trackingNumber.toString();
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Date orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(List<OrderItem> orderItems) {
-        this.orderItems = orderItems;
-    }
 }
