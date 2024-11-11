@@ -32,8 +32,8 @@ public class OrderDetailService implements IOrderDetailService{
                 .order(order)
                 .product(product)
                 .price(newOrderDetail.getPrice())
-                .color(newOrderDetail.getColor())
                 .totalMoney(newOrderDetail.getTotalMoney())
+                .returnDate(newOrderDetail.getReturnDate())
                 .numberOfProducts(newOrderDetail.getNumberOfProduct())
                 .build();
         return orderDetailRepository.save(orderDetail);
@@ -57,7 +57,7 @@ public class OrderDetailService implements IOrderDetailService{
                     orderDetail.setPrice(newOrderDetailDTO.getPrice());
                     orderDetail.setNumberOfProducts(newOrderDetailDTO.getNumberOfProduct());
                     orderDetail.setTotalMoney(newOrderDetailDTO.getTotalMoney());
-                    orderDetail.setColor(newOrderDetailDTO.getColor());
+                    orderDetail.setReturnDate(newOrderDetailDTO.getReturnDate());
                     orderDetail.setOrder(order);
                     orderDetail.setProduct(product);
                     return orderDetailRepository.save(orderDetail);

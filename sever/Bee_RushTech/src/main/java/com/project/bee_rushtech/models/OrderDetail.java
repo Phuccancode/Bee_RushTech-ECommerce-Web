@@ -4,6 +4,8 @@ package com.project.bee_rushtech.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "order_details")
 @Getter
@@ -33,6 +35,6 @@ public class OrderDetail {
     @Column(name = "total_money", nullable = false)
     private Float totalMoney;
 
-    @Column(name = "color")
-    private String color;
+    @Column(name = "return_date", nullable = false)
+    private LocalDate returnDate;
 }

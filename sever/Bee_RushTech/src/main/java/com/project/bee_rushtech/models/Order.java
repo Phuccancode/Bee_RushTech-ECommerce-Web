@@ -4,6 +4,8 @@ package com.project.bee_rushtech.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -37,8 +39,8 @@ public class Order {
     @Column(name= "phone_number", nullable = false, length = 100)
     private String phoneNumber;
 
-    @Column(name= "address", nullable = false, length = 100)
-    private String address;
+    @Column(name= "shipping_address", nullable = false, length = 100)
+    private String shippingAddress;
 
     @Column(name = "note", length = 100)
     private String note;
@@ -55,9 +57,6 @@ public class Order {
     @Column(name = "shipping_method")
     private String shippingMethod;
 
-    @Column(name = "shipping_address")
-    private String shippingAddress;
-
     @Column(name = "shipping_date")
     private LocalDate shippingDate;
 
@@ -69,5 +68,17 @@ public class Order {
 
     @Column(name = "active")
     private Boolean active;//thuộc về admin
+
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int LENGTH = 20;
+
+    public static String generateTrackingNumber() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder trackingNumber = new StringBuilder(LENGTH);
+        for (int i = 0; i < LENGTH; i++) {
+            trackingNumber.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+        }
+        return trackingNumber.toString();
+    }
 
 }

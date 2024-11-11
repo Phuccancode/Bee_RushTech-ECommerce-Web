@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @Getter
@@ -30,6 +32,7 @@ public class OrderDetailDTO {
     @Min(value = 0, message = "total money >=0")
     private Float totalMoney;
 
-    private String color;
+    @JsonProperty("return_date")
+    private LocalDate returnDate;
 }
 

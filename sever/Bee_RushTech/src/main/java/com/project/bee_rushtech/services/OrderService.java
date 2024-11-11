@@ -36,12 +36,15 @@ public class OrderService implements IOrderService{
         order.setUser(user);
         order.setOrderDate(new Date());
         order.setStatus(OrderStatus.PENDING);
-        LocalDate shippingDate = orderDTO.getShippingDate() == null ? LocalDate.now() : orderDTO.getShippingDate();
+
+        //default 5 ngày kể từ ngày hiện tại
+        LocalDate shippingDate = orderDTO.getShippingDate() == null ? LocalDate.now().plusDays(5)  : orderDTO.getShippingDate();
         if(shippingDate.isBefore(LocalDate.now())){
             throw new DateTimeException("Invalid shipping date");
         }
         order.setActive(true);
         order.setShippingDate(shippingDate);
+        order.setTrackingNumber(Order.generateTrackingNumber());
         orderRepository.save(order);
         return OrderResponse.fromOrder(order);
     }
@@ -62,7 +65,9 @@ public class OrderService implements IOrderService{
         modelMapper.typeMap(OrderDTO.class, Order.class)
                 .addMappings(mapper -> mapper.skip(Order::setId));
         modelMapper.map(orderDTO, order);
+        LocalDate shippingDate = orderDTO.getShippingDate() == null ? LocalDate.now().plusDays(5)  : orderDTO.getShippingDate();
         order.setUser(user);
+        order.setShippingDate(shippingDate);
         orderRepository.save(order);
         return OrderResponse.fromOrder(order);
     }
