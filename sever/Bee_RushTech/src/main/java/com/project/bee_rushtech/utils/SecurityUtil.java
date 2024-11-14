@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import com.nimbusds.jose.util.Base64;
 import com.project.bee_rushtech.responses.LoginResponse;
+import com.project.bee_rushtech.utils.errors.InvalidException;
 
 @Service
 public class SecurityUtil {
@@ -47,8 +48,12 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(this.jwtAccessExpiration, ChronoUnit.SECONDS);
 
-        List<String> authorities = new ArrayList<String>();
-        authorities.add("CUSTOMER");
+        String authorities = "";
+        if (email.equals("beerushtech@gmail.com")) {
+            authorities = "ADMIN";
+        } else {
+            authorities = "CUSTOMER";
+        }
         // @formatter:off 
         JwtClaimsSet claims = JwtClaimsSet.builder() 
             .issuedAt(now) 
@@ -70,12 +75,20 @@ public class SecurityUtil {
         Instant validity = now.plus(this.jwtRefreshExpiration, ChronoUnit.SECONDS);
 
         // @formatter:off 
+        String authorities = "";
+        if(email.equals("beerushtech@gmail.com")){
+            authorities = "ADMIN";
+        }
+        else {
+            authorities = "CUSTOMER";
+        }
         JwtClaimsSet claims = JwtClaimsSet.builder() 
             .issuedAt(now) 
             .expiresAt(validity) 
             .subject(email) 
             .claim("jti", resLoginDTO.getUser().getId())
             .claim("user", resLoginDTO.getUser()) 
+            .claim("permissions", authorities)
             .build(); 
  
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build(); 
@@ -86,14 +99,13 @@ public class SecurityUtil {
         byte[] keyBytes = Base64.from(jwtKey).decode();
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, JWT_ALGORITHM.getName());
     }
-    public Jwt checkValidRefreshToken(String refreshToken) {
+    public Jwt checkValidRefreshToken(String refreshToken) throws InvalidException{
        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
                 getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
                 try {
                     return jwtDecoder.decode(refreshToken);
                 } catch (Exception e) {
-                    System.out.println(">>> Refresh Token error: " + e.getMessage());
-                    throw e;
+                    throw new InvalidException("Invalid Token");
                 }
     }
 
@@ -128,7 +140,22 @@ public class SecurityUtil {
             .filter(authentication -> authentication.getCredentials() instanceof String)
             .map(authentication -> (String) authentication.getCredentials());
     }
+    
 
+    public String getEmailFromToken(String token) throws InvalidException {
+        Jwt tokenDecoded = this.checkValidRefreshToken(token);
+        return tokenDecoded.getSubject();
+    }
+
+    public Long getUserIdFromToken(String token) throws InvalidException {
+        Jwt tokenDecoded = this.checkValidRefreshToken(token);
+        return Long.parseLong(tokenDecoded.getId());
+    }
+
+    public String getRolesFromToken(String token) throws InvalidException {
+        Jwt tokenDecoded = this.checkValidRefreshToken(token);
+        return tokenDecoded.getClaim("permissions");
+    }
 
 
 }

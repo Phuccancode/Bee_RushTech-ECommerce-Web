@@ -7,6 +7,7 @@ import com.github.javafaker.Cat;
 import com.project.bee_rushtech.models.Cart;
 import com.project.bee_rushtech.models.CartItem;
 import com.project.bee_rushtech.models.Product;
+import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.repositories.CartItemRepository;
 import com.project.bee_rushtech.repositories.CartRepository;
 import com.project.bee_rushtech.repositories.ProductRepository;
@@ -29,9 +30,11 @@ public class CartService {
         this.cartItemRepository = cartItemRepository;
     }
 
-    public void createCart(Long userId) {
+    public void createCart(User user) {
         Cart cart = new Cart();
-        cart.setId(userId);
+
+        cart.setUser(user);
+
         cartRepository.save(cart);
     }
 
@@ -51,28 +54,20 @@ public class CartService {
         return this.cartItemRepository.save(cartItem);
     }
 
-    public void updateCartItem(Long cartId, Long cartItemId, Long quantity) throws InvalidException {
-        CartItem cartItem = cartItemRepository.findByIdAndCartId(cartItemId, cartId);
-        System.out.println(" cartId: " + cartId + " cartItemId: " + cartItemId);
-        if (cartItem == null) {
-            throw new InvalidException("Cart item not found!");
-        }
-        cartItem.setQuantity(quantity);
+    public void updateCartItem(CartItem cartItem) throws InvalidException {
         cartItemRepository.save(cartItem);
     }
 
-    public void removeProductFromCart(Long cartItemId) {
-        Optional<CartItem> cartItemOpt = cartItemRepository.findById(cartItemId);
-
-        if (cartItemOpt.isEmpty()) {
-            throw new RuntimeException("Cart item not found!");
-        }
-
-        cartItemRepository.delete(cartItemOpt.get());
+    public void removeProductFromCart(CartItem cartItem) {
+        cartItemRepository.delete(cartItem);
     }
 
     public List<CartItem> getAllCartItems(Long cartId) {
         return cartItemRepository.findAllByCartId(cartId);
+    }
+
+    public CartItem getItemByProductIdAndCartId(Long productId, Long cartId) {
+        return cartItemRepository.findByProductIdAndCartId(productId, cartId);
     }
 
     public boolean existsByUserId(Long userId) {
