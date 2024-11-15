@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 
 import com.nimbusds.jose.util.Base64;
+import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.responses.LoginResponse;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
@@ -47,13 +48,7 @@ public class SecurityUtil {
     public String createAccessToken(String email, LoginResponse.UserLogin resLoginDTO) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.jwtAccessExpiration, ChronoUnit.SECONDS);
-
-        String authorities = "";
-        if (email.equals("beerushtech@gmail.com")) {
-            authorities = "ADMIN";
-        } else {
-            authorities = "CUSTOMER";
-        }
+        String authorities = resLoginDTO.getRole();
         // @formatter:off 
         JwtClaimsSet claims = JwtClaimsSet.builder() 
             .issuedAt(now) 
@@ -75,13 +70,7 @@ public class SecurityUtil {
         Instant validity = now.plus(this.jwtRefreshExpiration, ChronoUnit.SECONDS);
 
         // @formatter:off 
-        String authorities = "";
-        if(email.equals("beerushtech@gmail.com")){
-            authorities = "ADMIN";
-        }
-        else {
-            authorities = "CUSTOMER";
-        }
+        String authorities = resLoginDTO.getUser().getRole();
         JwtClaimsSet claims = JwtClaimsSet.builder() 
             .issuedAt(now) 
             .expiresAt(validity) 

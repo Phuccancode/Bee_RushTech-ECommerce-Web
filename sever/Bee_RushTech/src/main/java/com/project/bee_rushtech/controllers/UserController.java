@@ -1,5 +1,6 @@
 package com.project.bee_rushtech.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.repository.query.Param;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.bee_rushtech.dtos.AuthorizeDTO;
 import com.project.bee_rushtech.dtos.ChangePasswordDTO;
 import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.responses.ChangePasswordResponse;
+import com.project.bee_rushtech.responses.UserResponse;
 import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
@@ -71,8 +74,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    @GetMapping("/customer/{id}")
-    public ResponseEntity<User> getUserById(@CookieValue(name = "refresh_token") String token, @PathVariable Long id)
+    @GetMapping("/user/{id}")
+    @ApiMessage("Get user successfully")
+    public ResponseEntity<UserResponse> getUserById(@CookieValue(name = "refresh_token") String token,
+            @PathVariable Long id)
             throws InvalidException {
         String role = this.securityUtil.getRolesFromToken(token);
         if (!role.equals("ADMIN")) {
@@ -80,20 +85,33 @@ public class UserController {
         }
         User user = this.userService.findById(id);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            throw new InvalidException("User not found");
         }
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
+                user.getPhoneNumber(), user.getAddress(), user.getRole());
+        return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
-    @GetMapping("/customer")
-    public ResponseEntity<List<User>> getAllUsers(@CookieValue(name = "refresh_token") String token)
+    @GetMapping("/user")
+    @ApiMessage("Get all users successfully")
+    public ResponseEntity<List<UserResponse>> getAllUsers(@CookieValue(name = "refresh_token") String token)
             throws InvalidException {
         String role = this.securityUtil.getRolesFromToken(token);
         if (!role.equals("ADMIN")) {
             throw new InvalidException("You are not authorized");
         }
         List<User> users = this.userService.findAllUsers();
-        return ResponseEntity.status(HttpStatus.OK).body(users);
+        if (users == null) {
+            throw new InvalidException("Users not found");
+        }
+        List<UserResponse> userResponses = new ArrayList();
+        for (User user : users) {
+            UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
+                    user.getPhoneNumber(), user.getAddress(), user.getRole());
+            userResponses.add(userResponse);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(userResponses);
     }
 
     @PutMapping("/user/change-password")
@@ -117,6 +135,30 @@ public class UserController {
         this.userService.handleUpdateUser(currentUser);
         ChangePasswordResponse response = new ChangePasswordResponse(hashPassword);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/user/authorize")
+    @ApiMessage("Authorize user successfully")
+    public ResponseEntity<UserResponse> authorizeUser(@CookieValue(name = "refresh_token") String token,
+            @RequestBody AuthorizeDTO authorizeDTO)
+            throws InvalidException {
+        String role = this.securityUtil.getRolesFromToken(token);
+        if (!role.equals("ADMIN")) {
+            throw new InvalidException("You are not authorized");
+        }
+        User currentUser = this.userService.getUserByEmail(authorizeDTO.getEmail());
+        if (currentUser == null) {
+            throw new InvalidException("User not found");
+        }
+        if (currentUser.getEmail().equals("beerushtech@gmail.com")) {
+            throw new InvalidException("You can not change role of this user");
+        }
+        currentUser.setRole(authorizeDTO.getRole());
+        User updatedUser = this.userService.handleUpdateUser(currentUser);
+        UserResponse userResponse = new UserResponse(updatedUser.getId(), updatedUser.getFullName(),
+                updatedUser.getEmail(),
+                updatedUser.getPhoneNumber(), updatedUser.getAddress(), updatedUser.getRole());
+        return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
 }

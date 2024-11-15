@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +25,7 @@ import com.project.bee_rushtech.models.Email;
 import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.responses.LoginResponse;
 import com.project.bee_rushtech.responses.ResetPasswordResponse;
+import com.project.bee_rushtech.responses.UserResponse;
 import com.project.bee_rushtech.services.EmailService;
 import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.SecurityUtil;
@@ -36,6 +38,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.UUID;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -60,14 +63,24 @@ public class AuthController {
         }
 
         @PostMapping("/register")
-        public ResponseEntity<User> register(@Valid @RequestBody User user) throws InvalidException {
+        @ApiMessage("Register successfully")
+        public ResponseEntity<UserResponse> register(@Valid @RequestBody User user) throws InvalidException {
                 if (this.userService.checkUserExists(user.getEmail())) {
                         throw new InvalidException("Email is already taken");
                 }
                 String hashPassword = this.passwordEncoder.encode(user.getPassword());
                 user.setPassword(hashPassword);
+                user.setRole("CUSTOMER");
                 User newUser = this.userService.handleCreateUser(user);
-                return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+
+                UserResponse userResponse = new UserResponse();
+                userResponse.setId(newUser.getId());
+                userResponse.setFullName(newUser.getFullName());
+                userResponse.setEmail(newUser.getEmail());
+                userResponse.setPhoneNumber(newUser.getPhoneNumber());
+                userResponse.setAddress(newUser.getAddress());
+                userResponse.setRole("CUSTOMER");
+                return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
         }
 
         @PostMapping("/login")
@@ -89,7 +102,7 @@ public class AuthController {
                 LoginResponse resLoginDTO = new LoginResponse();
                 User userDB = this.userService.getUserByEmail(loginDTO.getUsername());
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
-                                userDB.getFullName());
+                                userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(authentication.getName(),
                                 resLoginDTO.getUser());
@@ -145,7 +158,7 @@ public class AuthController {
                 LoginResponse resLoginDTO = new LoginResponse();
                 User userDB = this.userService.getUserByEmail(email);
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
-                                userDB.getFullName());
+                                userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(email, resLoginDTO.getUser());
 
@@ -240,6 +253,11 @@ public class AuthController {
                 currentUser.setRefreshToken(null);
                 this.userService.handleUpdateUser(currentUser);
                 return ResponseEntity.status(HttpStatus.OK).body(null);
+        }
+
+        @GetMapping("/login-with-google")
+        public String loginWithGoogle() {
+                return "redirect:/oauth2/authorization/google";
         }
 
 }

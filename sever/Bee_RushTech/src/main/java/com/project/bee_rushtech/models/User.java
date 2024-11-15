@@ -42,7 +42,5 @@ public class User extends BaseEntity {
     @Column(columnDefinition = "MEDIUMTEXT")
     private String passwordResetToken;
 
-    @ManyToOne
-    @JoinColumn(name = "roleId")
-    private Role role;
+    private String role;
 }
