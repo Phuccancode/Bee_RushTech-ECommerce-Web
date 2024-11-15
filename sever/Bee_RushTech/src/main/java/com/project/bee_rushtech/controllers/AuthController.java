@@ -257,7 +257,7 @@ public class AuthController {
 
         @GetMapping("/login-with-google")
         public String loginWithGoogle() {
-                return "redirect:/oauth2/authorization/google";
+                return "You are authenticated with Google";
         }
 
 }

@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -43,10 +44,10 @@ public class SecurityConfiguration {
                 .csrf(c -> c.disable())
                 .authorizeHttpRequests(
                         authz -> authz
-                                .requestMatchers("/auth/login", "/auth/refresh").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/customer/register").permitAll()
                                 .requestMatchers("/api/v1/auth/login-with-google").authenticated()
+                                .requestMatchers("get-user").authenticated()
+                                .requestMatchers("/home").authenticated()
+
                                 .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -55,8 +56,19 @@ public class SecurityConfiguration {
                 // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
                 // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
                 .formLogin(Customizer.withDefaults())
-                .oauth2Login(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler((request, response, authentication) -> {
+                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+                            String accessToken = token.getAuthorizedClientRegistrationId();
+
+                            // Store or process the access token as needed
+                            response.sendRedirect("/home"); // redirect after successful login
+                        }))
+
+                .logout(Customizer.withDefaults());
+
+        // .sessionManagement(session ->
+        // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
