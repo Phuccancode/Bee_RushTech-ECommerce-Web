@@ -39,8 +39,8 @@ public class UserService {
         }
     }
 
-    public User getUserByRefreshTokenAndEmail(String token, String email) {
-        return this.userRepository.findByRefreshTokenAndEmail(token, email);
+    public User getUserByRefreshTokenAndId(String token, Long id) {
+        return this.userRepository.findByRefreshTokenAndId(token, id);
     }
 
     public void updatePasswordResetToken(String token, User user) {

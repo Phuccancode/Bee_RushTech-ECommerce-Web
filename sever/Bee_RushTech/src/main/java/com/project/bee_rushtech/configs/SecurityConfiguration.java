@@ -24,6 +24,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
+
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
 import com.project.bee_rushtech.utils.SecurityUtil;
@@ -46,8 +48,6 @@ public class SecurityConfiguration {
                         authz -> authz
                                 .requestMatchers("/api/v1/auth/login-with-google").authenticated()
                                 .requestMatchers("get-user").authenticated()
-                                .requestMatchers("/home").authenticated()
-
                                 .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -62,7 +62,7 @@ public class SecurityConfiguration {
                             String accessToken = token.getAuthorizedClientRegistrationId();
 
                             // Store or process the access token as needed
-                            response.sendRedirect("/home"); // redirect after successful login
+                            response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after successful login
                         }))
 
                 .logout(Customizer.withDefaults());
@@ -108,6 +108,11 @@ public class SecurityConfiguration {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
 }

@@ -22,6 +22,7 @@ public class GlobalException {
             UsernameNotFoundException.class,
             BadCredentialsException.class,
             InvalidException.class,
+            UnAuthorizedException.class
     })
     public ResponseEntity<RestResponse<Object>> handleException(Exception e) {
         RestResponse<Object> res = new RestResponse<Object>();

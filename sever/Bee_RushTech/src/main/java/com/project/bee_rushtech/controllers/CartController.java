@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import com.project.bee_rushtech.dtos.CartItemDTO;
@@ -37,8 +36,11 @@ public class CartController {
 
     @PostMapping("/cart")
     public ResponseEntity<AddItemToCartResponse> addProductToCart(@RequestBody CartItemDTO cartItemDTO,
-            @CookieValue(name = "refresh_token") String token) throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+            @CookieValue(name = "refresh_token", defaultValue = "") String token) throws InvalidException {
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
+        }
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         if (this.cartService.existsByUserId(userId) == false) {
             User user = this.userService.findById(userId);
             this.cartService.createCart(user);
@@ -57,9 +59,13 @@ public class CartController {
     }
 
     @GetMapping("/cart")
-    public ResponseEntity<List<CartItemResponse>> getAllCarts(@CookieValue(name = "refresh_token") String token)
+    public ResponseEntity<List<CartItemResponse>> getAllCarts(
+            @CookieValue(name = "refresh_token", defaultValue = "") String token)
             throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
+        }
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         Cart geCart = cartService.getByUserId(userId);
         if (geCart == null) {
             throw new InvalidException("Your cart is empty!");
@@ -85,9 +91,13 @@ public class CartController {
     }
 
     @PutMapping("/cart")
-    public ResponseEntity<CartItemResponse> updateCartItem(@CookieValue(name = "refresh_token") String token,
+    public ResponseEntity<CartItemResponse> updateCartItem(
+            @CookieValue(name = "refresh_token", defaultValue = "") String token,
             @RequestBody CartItemDTO cartItemDTO) throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
+        }
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         Cart cart = cartService.getByUserId(userId);
         if (cart == null) {
             throw new InvalidException("Your cart is empty!");
@@ -110,9 +120,13 @@ public class CartController {
 
     @DeleteMapping("/cart")
     @ApiMessage("Delete product from cart successfully")
-    public ResponseEntity<Void> removeProductFromCart(@CookieValue(name = "refresh_token") String token,
+    public ResponseEntity<Void> removeProductFromCart(
+            @CookieValue(name = "refresh_token", defaultValue = "") String token,
             @RequestParam Long productId) throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
+        }
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         Cart cart = cartService.getByUserId(userId);
         if (cart == null) {
             throw new InvalidException("Your cart is empty!");

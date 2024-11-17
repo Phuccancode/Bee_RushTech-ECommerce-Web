@@ -3,63 +3,104 @@ package com.project.bee_rushtech.controllers;
 import com.project.bee_rushtech.dtos.CategoryDTO;
 import com.project.bee_rushtech.models.Category;
 import com.project.bee_rushtech.services.CategoryService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
+import com.project.bee_rushtech.utils.SecurityUtil;
+import com.project.bee_rushtech.utils.annotation.ApiMessage;
+import com.project.bee_rushtech.utils.errors.InvalidException;
 
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("${api.prefix}/categories")
-@RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
+    private final SecurityUtil securityUtil;
+
+    public CategoryController(CategoryService categoryService, SecurityUtil securityUtil) {
+        this.categoryService = categoryService;
+        this.securityUtil = securityUtil;
+    }
 
     @PostMapping("")
-    public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryDTO categoryDTO,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .toList();
+    @ApiMessage("Category created successfully")
+    public ResponseEntity<?> createCategory(@RequestBody CategoryDTO categoryDTO,
+            @CookieValue(name = "refresh_token", defaultValue = "") String token) throws InvalidException {
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
+        }
+        String role = this.securityUtil.getUserFromToken(token).getRole();
+        if (!role.equals("ADMIN")) {
+            throw new InvalidException("You are not authorized");
+        }
+        if (this.categoryService.existsByName(categoryDTO.getName()) == true) {
+            throw new InvalidException("Category already exists");
+
         }
         Category newCategory = categoryService.createCategory(categoryDTO);
         return ResponseEntity.ok(newCategory);
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAllCategories() {
+    @ApiMessage("All categories fetched successfully")
+    public ResponseEntity<List<Category>> getAllCategories(
+            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+            throws InvalidException {
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
+        }
+        String role = this.securityUtil.getUserFromToken(token).getRole();
+        if (!role.equals("ADMIN")) {
+            throw new InvalidException("You are not authorized");
+        }
         List<Category> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCategoryById(@PathVariable Long id) {
-        try {
-            Category existingCategory = categoryService.getCategoryById(id);
-            return ResponseEntity.ok(existingCategory);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+    @ApiMessage("Category fetched successfully")
+    public ResponseEntity<Category> getCategoryById(@PathVariable Long id,
+            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+            throws InvalidException {
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
         }
+        Category category = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(category);
 
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO categoryDTO) {
-        try {
-            return ResponseEntity.ok(categoryService.updateCategory(id, categoryDTO));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+    @ApiMessage("Category updated successfully")
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO categoryDTO,
+            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+            throws InvalidException {
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
         }
+        String role = this.securityUtil.getUserFromToken(token).getRole();
+        if (!role.equals("ADMIN")) {
+            throw new InvalidException("You are not authorized");
+        }
+        Category updatedCategory = categoryService.updateCategory(id, categoryDTO);
+        return ResponseEntity.ok(updatedCategory);
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+    @ApiMessage("Category deleted successfully")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id,
+            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+            throws InvalidException {
+        if (token.equals("")) {
+            throw new InvalidException("You are not authorized");
+        }
+        String role = this.securityUtil.getUserFromToken(token).getRole();
+        if (!role.equals("ADMIN")) {
+            throw new InvalidException("You are not authorized");
+        }
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok("Category deleted successfully");
+        return ResponseEntity.ok(null);
     }
 }

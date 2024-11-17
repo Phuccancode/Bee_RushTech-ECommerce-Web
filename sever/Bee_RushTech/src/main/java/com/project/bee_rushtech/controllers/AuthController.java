@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,12 +29,14 @@ import com.project.bee_rushtech.responses.LoginResponse;
 import com.project.bee_rushtech.responses.ResetPasswordResponse;
 import com.project.bee_rushtech.responses.UserResponse;
 import com.project.bee_rushtech.services.EmailService;
+import com.project.bee_rushtech.services.GoogleService;
 import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.CookieValue;
@@ -49,17 +53,24 @@ public class AuthController {
         private final UserService userService;
         private final EmailService emailService;
         private final PasswordEncoder passwordEncoder;
+        private final OAuth2AuthorizedClientService authorizedClientService;
+        private final GoogleService googleUserInfoService;
+
         @Value("${project.jwt.refresh-token-validity-in-seconds}")
         private long jwtRefreshExpiration;
 
         public AuthController(UserService userService, PasswordEncoder passwordEncoder,
                         AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil,
-                        EmailService emailService) {
+                        EmailService emailService, OAuth2AuthorizedClientService authorizedClientService,
+                        GoogleService googleUserInfoService) {
                 this.userService = userService;
                 this.authenticationManagerBuilder = authenticationManagerBuilder;
                 this.securityUtil = securityUtil;
                 this.emailService = emailService;
                 this.passwordEncoder = passwordEncoder;
+                this.authorizedClientService = authorizedClientService;
+                this.googleUserInfoService = googleUserInfoService;
+
         }
 
         @PostMapping("/register")
@@ -149,8 +160,9 @@ public class AuthController {
                         throws InvalidException {
                 Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(refreshToken);
                 String email = tokenDecoded.getSubject();
+                Long userId = Long.parseLong(tokenDecoded.getClaim("jti"));
 
-                User currentUser = this.userService.getUserByRefreshTokenAndEmail(refreshToken, email);
+                User currentUser = this.userService.getUserByRefreshTokenAndId(refreshToken, userId);
                 if (currentUser == null) {
                         throw new InvalidException("Refresh token is invalid");
                 }
@@ -256,8 +268,49 @@ public class AuthController {
         }
 
         @GetMapping("/login-with-google")
-        public String loginWithGoogle() {
-                return "You are authenticated with Google";
+        @ApiMessage("Login successfully")
+        public ResponseEntity<LoginResponse> getAccessToken(OAuth2AuthenticationToken authentication,
+                        HttpServletResponse response) {
+                String registrationId = authentication.getAuthorizedClientRegistrationId();
+
+                OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
+                                registrationId, authentication.getName());
+
+                String accessToken = client.getAccessToken().getTokenValue();
+
+                Map userInfoResponse = googleUserInfoService.getUserInfo(accessToken);
+                String email = (String) userInfoResponse.get("email");
+                String name = (String) userInfoResponse.get("name");
+                if (this.userService.checkUserExists(email) == false) {
+                        User user = new User();
+                        user.setEmail(email);
+                        user.setFullName(name);
+                        user.setRole("GOOGLE");
+                        user.setPassword("LOGIN_WITH_GOOGLE");
+                        user.setPhoneNumber("0000000000");
+                        this.userService.handleCreateUser(user);
+                }
+
+                LoginResponse resLoginDTO = new LoginResponse();
+                User userDB = this.userService.getUserByEmail(email);
+                LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
+                                userDB.getFullName(), userDB.getRole());
+                resLoginDTO.setUser(userLogin);
+                resLoginDTO.setAccess_token(accessToken);
+
+                String refreshToken = this.securityUtil.createRefreshToken(email, resLoginDTO);
+                this.userService.updateUserToken(refreshToken, email);
+
+                ResponseCookie cookie = ResponseCookie
+                                .from("refresh_token", refreshToken)
+                                .httpOnly(true)
+                                .maxAge(3600 * 24)
+                                .path("/")
+                                .build();
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                                .body(resLoginDTO);
         }
 
 }
