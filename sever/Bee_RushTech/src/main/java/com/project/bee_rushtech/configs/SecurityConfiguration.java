@@ -44,10 +44,12 @@ public class SecurityConfiguration {
             CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         http
                 .csrf(c -> c.disable())
+                // .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
                         authz -> authz
-                                .requestMatchers("/api/v1/auth/login-with-google").authenticated()
-                                .requestMatchers("get-user").authenticated()
+                                // .requestMatchers("/api/v1/auth/login-with-google").authenticated()
+                                // .requestMatchers("get-user").authenticated()
+                                .requestMatchers("/api/v1/auth/get-user").authenticated()
                                 .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

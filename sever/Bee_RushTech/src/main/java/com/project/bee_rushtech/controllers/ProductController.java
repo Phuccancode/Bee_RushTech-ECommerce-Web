@@ -8,6 +8,9 @@ import com.project.bee_rushtech.models.ProductImage;
 import com.project.bee_rushtech.responses.ProductListResponse;
 import com.project.bee_rushtech.responses.ProductResponse;
 import com.project.bee_rushtech.services.IProductService;
+import com.project.bee_rushtech.utils.SecurityUtil;
+import com.project.bee_rushtech.utils.errors.InvalidException;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -33,14 +36,24 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("${api.prefix}/products")
-@RequiredArgsConstructor
 public class ProductController {
     private final IProductService productService;
+    private final SecurityUtil securityUtil;
+
+    public ProductController(IProductService productService, SecurityUtil securityUtil) {
+        this.productService = productService;
+        this.securityUtil = securityUtil;
+    }
 
     @PostMapping("")
-    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO productDTO,
+    public ResponseEntity<?> createProduct(@CookieValue(name = "refresh_token", defaultValue = "") String token,
+            @Valid @RequestBody ProductDTO productDTO,
             BindingResult result) {
         try {
+            String role = this.securityUtil.getUserFromToken(token).getRole();
+            if (!role.equals("ADMIN")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
+            }
             if (result.hasErrors()) {
                 List<String> errorMessages = result.getFieldErrors()
                         .stream()
@@ -105,8 +118,7 @@ public class ProductController {
     @GetMapping("")
     public ResponseEntity<ProductListResponse> getProducts(
             @RequestParam("page") int page,
-            @RequestParam("limit") int limit
-    ){
+            @RequestParam("limit") int limit) {
         PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
         Page<ProductResponse> productPage = productService.getAllProducts(pageRequest);
         int totalPages = productPage.getTotalPages();
@@ -125,35 +137,46 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable long id) {
+    public ResponseEntity<String> deleteProduct(@PathVariable long id,
+            @CookieValue(name = "refresh_token", defaultValue = "") String token) throws InvalidException {
         // giong voi ResponseEntity.ok()
         // return ResponseEntity.status(HttpStatus.OK).body("Product deleted
         // successfully");
         // Dung cai binh thuong hay hon
+        String role = this.securityUtil.getUserFromToken(token).getRole();
+        if (!role.equals("ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
+        }
         productService.deleteProduct(id);
         return ResponseEntity.ok("Product deleted with id " + id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable long id, @Valid @ModelAttribute ProductDTO productDTO) {
+    public ResponseEntity<?> updateProduct(@PathVariable long id, @Valid @ModelAttribute ProductDTO productDTO,
+            @CookieValue(name = "refresh_token", defaultValue = "") String token) throws InvalidException {
         try {
+            String role = this.securityUtil.getUserFromToken(token).getRole();
+            if (!role.equals("ADMIN")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
+            }
             productService.updateProduct(id, productDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("Product with id " + id + " is updated");
     }
+
     @PostMapping("/generateFakeProducts")
-    public ResponseEntity<String> generateFakeProducts(){
+    public ResponseEntity<String> generateFakeProducts() {
         Faker faker = new Faker();
-        for(int i = 0; i < 5000; i++){
-            String productName =faker.commerce().productName();
-            if(productService.existsByName(productName)){
+        for (int i = 0; i < 5000; i++) {
+            String productName = faker.commerce().productName();
+            if (productService.existsByName(productName)) {
                 continue;
             }
             ProductDTO productDTO = ProductDTO.builder()
                     .name(productName)
-                    .price((float)faker.number().numberBetween(50_000, 50_000_000))
+                    .price((float) faker.number().numberBetween(50_000, 50_000_000))
                     .thumbnail("")
                     .description(faker.lorem().sentence())
                     .build();

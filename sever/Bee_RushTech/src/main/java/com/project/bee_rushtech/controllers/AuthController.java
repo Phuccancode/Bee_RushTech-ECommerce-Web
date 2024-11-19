@@ -35,6 +35,7 @@ import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -96,7 +97,8 @@ public class AuthController {
 
         @PostMapping("/login")
         @ApiMessage("Login successfully")
-        public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTO loginDTO) {
+        public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginDTO loginDTO,
+                        HttpServletResponse response) {
 
                 // Nạp input gồm username/password vào Security
 
@@ -115,14 +117,9 @@ public class AuthController {
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
                                 userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
-                String access_token = this.securityUtil.createAccessToken(authentication.getName(),
-                                resLoginDTO.getUser());
-
-                resLoginDTO.setAccess_token(access_token);
-                // create refresh token
                 String refresh_token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), resLoginDTO);
+                resLoginDTO.setRefreshToken(refresh_token);
 
-                // update refresh token to user
                 this.userService.updateUserToken(refresh_token, loginDTO.getUsername());
                 ResponseCookie cookie = ResponseCookie
                                 .from("refresh_token", refresh_token)
@@ -136,60 +133,25 @@ public class AuthController {
                                 .body(resLoginDTO);
         }
 
-        @GetMapping("/getaccount")
-        @ApiMessage("Get account successfully")
-        public ResponseEntity<LoginResponse.UserLogin> getAccount() throws InvalidException {
-                String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
-                                : "";
-
-                User currentUser = this.userService.getUserByEmail(email);
-                LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin();
-                if (currentUser != null) {
-                        userLogin.setId(currentUser.getId());
-                        userLogin.setEmail(currentUser.getEmail());
-                        userLogin.setName(currentUser.getFullName());
-                } else {
-                        throw new InvalidException("Not found user have login");
-                }
-                return ResponseEntity.ok().body(userLogin);
-        }
-
-        @GetMapping("/refresh")
-        @ApiMessage("Get User by refresh token")
-        public ResponseEntity<LoginResponse> getRefreshToken(@CookieValue(name = "refresh_token") String refreshToken)
+        @GetMapping("/get-user")
+        @ApiMessage("Get user successfully")
+        public ResponseEntity<UserResponse> getUserByEmail(
+                        @CookieValue(name = "refresh_token", defaultValue = "") String token,
+                        HttpServletRequest request)
                         throws InvalidException {
-                Jwt tokenDecoded = this.securityUtil.checkValidRefreshToken(refreshToken);
-                String email = tokenDecoded.getSubject();
-                Long userId = Long.parseLong(tokenDecoded.getClaim("jti"));
 
-                User currentUser = this.userService.getUserByRefreshTokenAndId(refreshToken, userId);
-                if (currentUser == null) {
-                        throw new InvalidException("Refresh token is invalid");
+                if (token.isEmpty()) {
+                        throw new InvalidException("You are not login");
                 }
 
-                LoginResponse resLoginDTO = new LoginResponse();
-                User userDB = this.userService.getUserByEmail(email);
-                LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
-                                userDB.getFullName(), userDB.getRole());
-                resLoginDTO.setUser(userLogin);
-                String access_token = this.securityUtil.createAccessToken(email, resLoginDTO.getUser());
-
-                resLoginDTO.setAccess_token(access_token);
-                // create refresh token
-                String newRefreshToken = this.securityUtil.createRefreshToken(email, resLoginDTO);
-
-                // update refresh token to user
-                this.userService.updateUserToken(newRefreshToken, email);
-                ResponseCookie cookie = ResponseCookie
-                                .from("refresh_token", newRefreshToken)
-                                .httpOnly(true)
-                                .maxAge(jwtRefreshExpiration)
-                                .path("/")
-                                .build();
-
-                return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                                .body(resLoginDTO);
+                Long userId = this.securityUtil.getUserFromToken(token).getId();
+                User user = this.userService.findById(userId);
+                if (user == null) {
+                        throw new InvalidException("You are not authorized");
+                }
+                UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
+                                user.getPhoneNumber(), user.getAddress(), user.getRole());
+                return ResponseEntity.status(HttpStatus.OK).body(userResponse);
         }
 
         @PostMapping("/logout")
@@ -296,9 +258,8 @@ public class AuthController {
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
                                 userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
-                resLoginDTO.setAccess_token(accessToken);
-
                 String refreshToken = this.securityUtil.createRefreshToken(email, resLoginDTO);
+                resLoginDTO.setRefreshToken(refreshToken);
                 this.userService.updateUserToken(refreshToken, email);
 
                 ResponseCookie cookie = ResponseCookie
