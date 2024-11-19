@@ -49,7 +49,12 @@ public class SecurityConfiguration {
                         authz -> authz
                                 // .requestMatchers("/api/v1/auth/login-with-google").authenticated()
                                 // .requestMatchers("get-user").authenticated()
-                                .anyRequest().permitAll())
+                                .requestMatchers("/api/v1/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+                                .requestMatchers("/api/v1/auth/reset-password").permitAll()
+                                .requestMatchers("/api/v1/auth/logout").permitAll()
+                                .requestMatchers("/api/v1/auth/login-with-google").permitAll()
+                                .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 // .exceptionHandling(
@@ -66,10 +71,10 @@ public class SecurityConfiguration {
                             response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after successful login
                         }))
 
-                .logout(Customizer.withDefaults())
+                .logout(Customizer.withDefaults());
 
-        //  .sessionManagement(session ->
-        //  session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        // .sessionManagement(session ->
+        // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }

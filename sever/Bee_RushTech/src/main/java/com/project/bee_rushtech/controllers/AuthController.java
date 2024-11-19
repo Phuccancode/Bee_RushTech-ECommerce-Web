@@ -117,10 +117,9 @@ public class AuthController {
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
                                 userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
+                String access_token = this.securityUtil.createAccessToken(loginDTO.getUsername(), userLogin);
+                resLoginDTO.setAccessToken(access_token);
                 String refresh_token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), resLoginDTO);
-                resLoginDTO.setRefreshToken(refresh_token);
-
-                this.userService.updateUserToken(refresh_token, loginDTO.getUsername());
                 ResponseCookie cookie = ResponseCookie
                                 .from("refresh_token", refresh_token)
                                 .httpOnly(true)
@@ -128,30 +127,12 @@ public class AuthController {
                                 .path("/")
                                 .build();
 
+                this.userService.updateUserToken(refresh_token, loginDTO.getUsername());
+
                 return ResponseEntity.ok()
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + access_token)
                                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                                 .body(resLoginDTO);
-        }
-
-        @GetMapping("/get-user")
-        @ApiMessage("Get user successfully")
-        public ResponseEntity<UserResponse> getUserByEmail(
-                        @CookieValue(name = "refresh_token", defaultValue = "") String token,
-                        HttpServletRequest request)
-                        throws InvalidException {
-
-                if (token.isEmpty()) {
-                        throw new InvalidException("You are not login");
-                }
-
-                Long userId = this.securityUtil.getUserFromToken(token).getId();
-                User user = this.userService.findById(userId);
-                if (user == null) {
-                        throw new InvalidException("You are not authorized");
-                }
-                UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
-                                user.getPhoneNumber(), user.getAddress(), user.getRole());
-                return ResponseEntity.status(HttpStatus.OK).body(userResponse);
         }
 
         @PostMapping("/logout")
@@ -176,7 +157,7 @@ public class AuthController {
                                 .body(null);
         }
 
-        @PostMapping("/resetpassword")
+        @PostMapping("/reset-password")
         public ResponseEntity<ResetPasswordResponse> resetPassword(HttpServletRequest request,
                         @RequestParam("email") String email)
                         throws InvalidException {
@@ -208,7 +189,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.OK).body(resetPasswordResponse);
         }
 
-        @PutMapping("/resetpassword")
+        @PutMapping("/reset-password")
         @ApiMessage("Reset password successfully")
         public ResponseEntity<Void> resetPassword(@Valid @RequestParam("token") String token,
                         @RequestBody ResetPasswordDTO resetPasswordDTOpassword)
@@ -258,8 +239,9 @@ public class AuthController {
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
                                 userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
+                String access_token = this.securityUtil.createAccessToken(email, userLogin);
                 String refreshToken = this.securityUtil.createRefreshToken(email, resLoginDTO);
-                resLoginDTO.setRefreshToken(refreshToken);
+                resLoginDTO.setAccessToken(access_token);
                 this.userService.updateUserToken(refreshToken, email);
 
                 ResponseCookie cookie = ResponseCookie

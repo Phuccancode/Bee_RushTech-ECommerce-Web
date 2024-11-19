@@ -27,6 +27,7 @@ import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -50,6 +51,23 @@ public class UserController {
         this.authorizedClientService = authorizedClientService;
         this.googleUserInfoService = googleUserInfoService;
 
+    }
+
+    @GetMapping("/user/get-user")
+    @ApiMessage("Get user successfully")
+    public ResponseEntity<UserResponse> getUserLogin(
+            HttpServletRequest request)
+            throws InvalidException {
+
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
+        User user = this.userService.findById(userId);
+        if (user == null) {
+            throw new InvalidException("You are not authorized");
+        }
+        UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
+                user.getPhoneNumber(), user.getAddress(), user.getRole());
+        return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
     @PutMapping("/user/profile")
@@ -77,18 +95,11 @@ public class UserController {
 
     @GetMapping("/user/profile")
     @ApiMessage("Get information successfully")
-    public ResponseEntity<UserResponse> getUserByEmail(
-            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+    public ResponseEntity<UserResponse> getProfileUser(HttpServletRequest request)
             throws InvalidException {
-
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         Long userId = this.securityUtil.getUserFromToken(token).getId();
-        User user = this.userService.getUserByRefreshTokenAndId(token, userId);
-        if (user == null) {
-            throw new InvalidException("You are not authorized");
-        }
+        User user = this.userService.findById(userId);
         UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
                 user.getPhoneNumber(), user.getAddress(), user.getRole());
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
@@ -118,12 +129,9 @@ public class UserController {
 
     @GetMapping("/user")
     @ApiMessage("Get all users successfully")
-    public ResponseEntity<List<UserResponse>> getAllUsers(
-            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+    public ResponseEntity<List<UserResponse>> getAllUsers(HttpServletRequest request)
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         String role = this.securityUtil.getUserFromToken(token).getRole();
         if (!role.equals("ADMIN")) {
             throw new InvalidException("You are not authorized");
@@ -145,12 +153,10 @@ public class UserController {
     @PutMapping("/user/change-password")
     @ApiMessage("Change password successfully")
     public ResponseEntity<Void> changePassword(
-            @Valid @CookieValue(name = "refresh_token", defaultValue = "") String token,
+            @Valid HttpServletRequest request,
             @RequestBody ChangePasswordDTO changePassword)
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         Long userId = this.securityUtil.getUserFromToken(token).getId();
         User currentUser = this.userService.findById(userId);
         if (currentUser == null) {
@@ -170,13 +176,10 @@ public class UserController {
 
     @PutMapping("/user/authorize")
     @ApiMessage("Authorize user successfully")
-    public ResponseEntity<UserResponse> authorizeUser(
-            @CookieValue(name = "refresh_token", defaultValue = "") String token,
+    public ResponseEntity<UserResponse> authorizeUser(HttpServletRequest request,
             @RequestBody AuthorizeDTO authorizeDTO)
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         String role = this.securityUtil.getUserFromToken(token).getRole();
         if (!role.equals("ADMIN")) {
             throw new InvalidException("You are not authorized");

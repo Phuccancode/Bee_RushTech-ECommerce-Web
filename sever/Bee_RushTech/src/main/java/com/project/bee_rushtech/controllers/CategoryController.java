@@ -7,6 +7,7 @@ import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +27,8 @@ public class CategoryController {
     @PostMapping("")
     @ApiMessage("Category created successfully")
     public ResponseEntity<?> createCategory(@RequestBody CategoryDTO categoryDTO,
-            @CookieValue(name = "refresh_token", defaultValue = "") String token) throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+            HttpServletRequest request) throws InvalidException {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         String role = this.securityUtil.getUserFromToken(token).getRole();
         if (!role.equals("ADMIN")) {
             throw new InvalidException("You are not authorized");
@@ -44,28 +43,16 @@ public class CategoryController {
 
     @GetMapping("")
     @ApiMessage("All categories fetched successfully")
-    public ResponseEntity<List<Category>> getAllCategories(
-            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+    public ResponseEntity<List<Category>> getAllCategories()
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
-        String role = this.securityUtil.getUserFromToken(token).getRole();
-        if (!role.equals("ADMIN")) {
-            throw new InvalidException("You are not authorized");
-        }
         List<Category> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/{id}")
     @ApiMessage("Category fetched successfully")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id,
-            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+    public ResponseEntity<Category> getCategoryById(@PathVariable Long id)
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
         Category category = categoryService.getCategoryById(id);
         return ResponseEntity.ok(category);
 
@@ -74,11 +61,9 @@ public class CategoryController {
     @PutMapping("/{id}")
     @ApiMessage("Category updated successfully")
     public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO categoryDTO,
-            @CookieValue(name = "refresh_token", defaultValue = "") String token)
+            HttpServletRequest request)
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         String role = this.securityUtil.getUserFromToken(token).getRole();
         if (!role.equals("ADMIN")) {
             throw new InvalidException("You are not authorized");
@@ -91,11 +76,8 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     @ApiMessage("Category deleted successfully")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id,
-            @CookieValue(name = "refresh_token", defaultValue = "") String token)
-            throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+            HttpServletRequest request) throws InvalidException {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         String role = this.securityUtil.getUserFromToken(token).getRole();
         if (!role.equals("ADMIN")) {
             throw new InvalidException("You are not authorized");

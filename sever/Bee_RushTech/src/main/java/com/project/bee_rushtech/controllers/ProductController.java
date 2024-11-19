@@ -11,6 +11,7 @@ import com.project.bee_rushtech.services.IProductService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -46,10 +47,11 @@ public class ProductController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createProduct(@CookieValue(name = "refresh_token", defaultValue = "") String token,
+    public ResponseEntity<?> createProduct(HttpServletRequest request,
             @Valid @RequestBody ProductDTO productDTO,
             BindingResult result) {
         try {
+            String token = request.getHeader("Authorization").replace("Bearer ", "");
             String role = this.securityUtil.getUserFromToken(token).getRole();
             if (!role.equals("ADMIN")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
@@ -138,11 +140,12 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable long id,
-            @CookieValue(name = "refresh_token", defaultValue = "") String token) throws InvalidException {
+            HttpServletRequest request) throws InvalidException {
         // giong voi ResponseEntity.ok()
         // return ResponseEntity.status(HttpStatus.OK).body("Product deleted
         // successfully");
         // Dung cai binh thuong hay hon
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         String role = this.securityUtil.getUserFromToken(token).getRole();
         if (!role.equals("ADMIN")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
@@ -153,8 +156,9 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable long id, @Valid @ModelAttribute ProductDTO productDTO,
-            @CookieValue(name = "refresh_token", defaultValue = "") String token) throws InvalidException {
+            HttpServletRequest request) throws InvalidException {
         try {
+            String token = request.getHeader("Authorization").replace("Bearer ", "");
             String role = this.securityUtil.getUserFromToken(token).getRole();
             if (!role.equals("ADMIN")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
