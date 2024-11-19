@@ -49,7 +49,6 @@ public class SecurityConfiguration {
                         authz -> authz
                                 // .requestMatchers("/api/v1/auth/login-with-google").authenticated()
                                 // .requestMatchers("get-user").authenticated()
-                                .requestMatchers("/api/v1/auth/get-user").authenticated()
                                 .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -67,10 +66,10 @@ public class SecurityConfiguration {
                             response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after successful login
                         }))
 
-                .logout(Customizer.withDefaults());
+                .logout(Customizer.withDefaults())
 
-        // .sessionManagement(session ->
-        // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        //  .sessionManagement(session ->
+        //  session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
