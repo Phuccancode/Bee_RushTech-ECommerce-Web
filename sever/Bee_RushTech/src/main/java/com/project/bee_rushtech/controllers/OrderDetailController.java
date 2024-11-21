@@ -29,6 +29,7 @@ public class OrderDetailController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderDetail(
             @Valid @PathVariable("id") Long id){
@@ -49,17 +50,17 @@ public class OrderDetailController {
         return ResponseEntity.ok(orderDetailResponses);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateOrderDetail(
-            @Valid @PathVariable("id") Long id,
-            @Valid @RequestBody OrderDetailDTO orderDetailDTO){
-        try{
-            OrderDetail orderDetail = orderDetailService.updateOrderDetail(id, orderDetailDTO);
-            return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> updateOrderDetail(
+//            @Valid @PathVariable("id") Long id,
+//            @Valid @RequestBody OrderDetailDTO orderDetailDTO){
+//        try{
+//            OrderDetail orderDetail = orderDetailService.updateOrderDetail(id, orderDetailDTO);
+//            return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
+//        }catch (Exception e){
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrderDetail(
             @Valid @PathVariable("id") Long id ){
