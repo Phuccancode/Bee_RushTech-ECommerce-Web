@@ -13,4 +13,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     CartItem findByProductId(Long productId); // Phương thức để tìm mục giỏ hàng theo productid
 
+    boolean existsByProductIdAndCartId(Long productId, Long cartId); // Phương thức để kiểm tra xem mục giỏ hàng có tồn
+                                                                     // tại không
+
 }

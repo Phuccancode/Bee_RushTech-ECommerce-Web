@@ -12,9 +12,11 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -22,12 +24,14 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
+
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
 import com.project.bee_rushtech.utils.SecurityUtil;
-import java.util.Properties;
 
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
     @Bean
@@ -40,20 +44,37 @@ public class SecurityConfiguration {
             CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         http
                 .csrf(c -> c.disable())
+                // .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
                         authz -> authz
-                                .requestMatchers("/auth/login", "/auth/refresh").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/customer/register").permitAll()
-                                .anyRequest().permitAll())
+                                // .requestMatchers("/api/v1/auth/login-with-google").authenticated()
+                                // .requestMatchers("get-user").authenticated()
+                                .requestMatchers("/api/v1/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+                                .requestMatchers("/api/v1/auth/reset-password").permitAll()
+                                .requestMatchers("/api/v1/auth/logout").permitAll()
+                                .requestMatchers("/api/v1/auth/login-with-google").permitAll()
+                                .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 // .exceptionHandling(
                 // exceptions -> exceptions
                 // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
                 // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
-                .formLogin(f -> f.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .formLogin(Customizer.withDefaults())
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler((request, response, authentication) -> {
+                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+                            String accessToken = token.getAuthorizedClientRegistrationId();
+
+                            // Store or process the access token as needed
+                            response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after successful login
+                        }))
+
+                .logout(Customizer.withDefaults());
+
+        // .sessionManagement(session ->
+        // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
@@ -93,6 +114,11 @@ public class SecurityConfiguration {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
 }
