@@ -3,7 +3,6 @@ package com.project.bee_rushtech.controllers;
 import com.project.bee_rushtech.dtos.OrderDetailDTO;
 import com.project.bee_rushtech.models.OrderDetail;
 import com.project.bee_rushtech.responses.OrderDetailResponse;
-import com.project.bee_rushtech.responses.OrderResponse;
 import com.project.bee_rushtech.services.IOrderDetailService;
 import com.project.bee_rushtech.services.IOrderService;
 import com.project.bee_rushtech.services.OrderService;
@@ -36,10 +35,9 @@ public class OrderDetailController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderDetail(
-            @Valid @PathVariable("id") Long id) {
+            @Valid @PathVariable("id") Long id){
         try {
             OrderDetail orderDetail = orderDetailService.getOrderDetail(id);
             return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
@@ -47,7 +45,6 @@ public class OrderDetailController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @GetMapping("order/{orderId}")
     public ResponseEntity<?> getOrderDetails(@CookieValue(name = "refresh_token", defaultValue = "") String token,
             @PathVariable("orderId") Long orderId) throws InvalidException {
@@ -66,18 +63,17 @@ public class OrderDetailController {
         return ResponseEntity.ok(orderDetailResponses);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateOrderDetail(
-            @Valid @PathVariable("id") Long id,
-            @Valid @RequestBody OrderDetailDTO orderDetailDTO) {
-        try {
-            OrderDetail orderDetail = orderDetailService.updateOrderDetail(id, orderDetailDTO);
-            return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> updateOrderDetail(
+//            @Valid @PathVariable("id") Long id,
+//            @Valid @RequestBody OrderDetailDTO orderDetailDTO){
+//        try{
+//            OrderDetail orderDetail = orderDetailService.updateOrderDetail(id, orderDetailDTO);
+//            return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
+//        }catch (Exception e){
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrderDetail(
             @Valid @PathVariable("id") Long id) {
