@@ -12,9 +12,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User save(User user);
 
     User findByEmail(String email);
+
     boolean existsByEmail(String email);
 
-    User findByRefreshTokenAndEmail(String refreshToken, String email);
+    User findByRefreshTokenAndId(String refreshToken, Long id);
 
     User findByPasswordResetToken(String passwordResetToken);
 }

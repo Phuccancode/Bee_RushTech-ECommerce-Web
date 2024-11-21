@@ -1,23 +1,21 @@
 package com.project.bee_rushtech.responses;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class LoginResponse {
-    private String access_token;
+    private String accessToken;
     private UserLogin user;
 
-    @Getter
-    @Setter
+    @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class UserLogin {
         private long id;
         private String email;
         private String name;
+        private String role;
     }
 }

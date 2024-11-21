@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import com.project.bee_rushtech.dtos.CartItemDTO;
@@ -20,6 +19,8 @@ import com.project.bee_rushtech.services.UserService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
 import com.project.bee_rushtech.utils.errors.InvalidException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("${api.prefix}/customer")
@@ -37,8 +38,9 @@ public class CartController {
 
     @PostMapping("/cart")
     public ResponseEntity<AddItemToCartResponse> addProductToCart(@RequestBody CartItemDTO cartItemDTO,
-            @CookieValue(name = "refresh_token") String token) throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+            HttpServletRequest request) throws InvalidException {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         if (this.cartService.existsByUserId(userId) == false) {
             User user = this.userService.findById(userId);
             this.cartService.createCart(user);
@@ -57,9 +59,10 @@ public class CartController {
     }
 
     @GetMapping("/cart")
-    public ResponseEntity<List<CartItemResponse>> getAllCarts(@CookieValue(name = "refresh_token") String token)
+    public ResponseEntity<List<CartItemResponse>> getAllCarts(HttpServletRequest request)
             throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         Cart geCart = cartService.getByUserId(userId);
         if (geCart == null) {
             throw new InvalidException("Your cart is empty!");
@@ -85,9 +88,10 @@ public class CartController {
     }
 
     @PutMapping("/cart")
-    public ResponseEntity<CartItemResponse> updateCartItem(@CookieValue(name = "refresh_token") String token,
+    public ResponseEntity<CartItemResponse> updateCartItem(HttpServletRequest request,
             @RequestBody CartItemDTO cartItemDTO) throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         Cart cart = cartService.getByUserId(userId);
         if (cart == null) {
             throw new InvalidException("Your cart is empty!");
@@ -110,9 +114,10 @@ public class CartController {
 
     @DeleteMapping("/cart")
     @ApiMessage("Delete product from cart successfully")
-    public ResponseEntity<Void> removeProductFromCart(@CookieValue(name = "refresh_token") String token,
+    public ResponseEntity<Void> removeProductFromCart(HttpServletRequest request,
             @RequestParam Long productId) throws InvalidException {
-        Long userId = this.securityUtil.getUserIdFromToken(token);
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
         Cart cart = cartService.getByUserId(userId);
         if (cart == null) {
             throw new InvalidException("Your cart is empty!");

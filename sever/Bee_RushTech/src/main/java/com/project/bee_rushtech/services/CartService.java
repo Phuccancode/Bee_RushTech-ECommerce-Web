@@ -46,10 +46,15 @@ public class CartService {
             throw new RuntimeException("Product or Cart not found!");
         }
 
-        CartItem cartItem = new CartItem();
-        cartItem.setCart(cartOpt.get());
-        cartItem.setProduct(productOpt.get());
-        cartItem.setQuantity(quantity);
+        CartItem cartItem = this.cartItemRepository.findByProductIdAndCartId(productId, cartId);
+        if (cartItem == null) {
+            cartItem = new CartItem();
+            cartItem.setCart(cartOpt.get());
+            cartItem.setProduct(productOpt.get());
+            cartItem.setQuantity(quantity);
+        } else {
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        }
 
         return this.cartItemRepository.save(cartItem);
     }

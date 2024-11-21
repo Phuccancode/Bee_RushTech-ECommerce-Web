@@ -15,4 +15,9 @@ public interface IOrderService {
     void deleteOrder(Long orderId) throws Exception;
 
     List<OrderResponse> findByUserId(Long userId);
+
+    OrderResponse findByOrderIdAndUserId(Long orderId, Long userId) throws Exception;
+
+    boolean checkOrderOwner(Long orderId, Long userId);
+
 }
