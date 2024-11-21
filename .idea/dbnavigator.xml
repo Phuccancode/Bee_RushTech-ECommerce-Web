@@ -17,7 +17,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54">
-      <console name="aiven" type="STANDARD" schema="shopapp" session="Main"><![CDATA[-- Khách hàng khi muốn mua hàng => phải đăng ký tài khoản => bảng users
+      <console name="aiven" type="STANDARD" schema="shopapp" session="Main">-- Khách hàng khi muốn mua hàng =&gt; phải đăng ký tài khoản =&gt; bảng users
 CREATE TABLE roles(
     id INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL 
@@ -59,13 +59,13 @@ CREATE TABLE categories(
     name varchar(100) NOT NULL DEFAULT '' COMMENT 'Tên danh mục, vd: đồ điện tử'
 );
 
--- Bảng chứa sản phẩm(Product): "laptop macbook air 15 inch 2023", iphone 15 pro,...
+-- Bảng chứa sản phẩm(Product): &quot;laptop macbook air 15 inch 2023&quot;, iphone 15 pro,...
 CREATE TABLE products (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(350) COMMENT 'Tên sản phẩm',
     brand VARCHAR(50) NOT NULL,
-    import_price FLOAT NOT NULL CHECK(import_price>=0),
-    price FLOAT NOT NULL CHECK (price >= 0),
+    import_price FLOAT NOT NULL CHECK(import_price&gt;=0),
+    price FLOAT NOT NULL CHECK (price &gt;= 0),
     thumbnail VARCHAR(300) DEFAULT '',
     description LONGTEXT,
     created_at DATETIME,
@@ -85,7 +85,7 @@ CREATE TABLE orders(
     note VARCHAR(100) DEFAULT '',
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') COMMENT 'Trạng thái đơn hàng',
-    total_money FLOAT CHECK(total_money >= 0),
+    total_money FLOAT CHECK(total_money &gt;= 0),
     shipping_method VARCHAR(100) NOT NULL,
     shipping_address VARCHAR(200) NOT NULL,
     shipping_date DATE NOT NULL,
@@ -100,9 +100,9 @@ CREATE TABLE order_details(
     id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT,
     product_id INT,
-    price FLOAT CHECK(price >= 0),
-    number_of_products INT CHECK(number_of_products > 0),
-    total_money FLOAT CHECK(total_money >= 0),
+    price FLOAT CHECK(price &gt;= 0),
+    number_of_products INT CHECK(number_of_products &gt; 0),
+    total_money FLOAT CHECK(total_money &gt;= 0),
 	return_date DATE NOT NULL,
     return_method ENUM('home', 'store'),
     FOREIGN KEY (product_id) REFERENCES products (id),
@@ -133,7 +133,7 @@ CREATE TABLE product_images(
         FOREIGN KEY (product_id)
         REFERENCES products (id) ON DELETE CASCADE,
     image_url VARCHAR(300)
-);]]></console>
+);</console>
     </connection>
     <connection id="5d9793bb-f68e-432b-bc9a-49cf942647b5">
       <console name="local" type="STANDARD" schema="" session="Main" />
@@ -144,7 +144,7 @@ CREATE TABLE product_images(
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files>
-      <object connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" object-ref="schemas/shopapp/tables/cart_items" />
+      <object connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" object-ref="schemas/shopapp/tables/users" />
     </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
@@ -153,6 +153,7 @@ CREATE TABLE product_images(
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="shopapp.cart_items" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" dataset="shopapp.users" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
