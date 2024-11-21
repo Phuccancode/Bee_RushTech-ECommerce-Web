@@ -48,10 +48,11 @@ public class ProductController {
 
     @PostMapping("")
     public ResponseEntity<?> createProduct(HttpServletRequest request,
-            @Valid @RequestBody ProductDTO productDTO,
+            @RequestBody ProductDTO productDTO,
             BindingResult result) {
         try {
             String token = request.getHeader("Authorization").replace("Bearer ", "");
+            System.out.println(token);
             String role = this.securityUtil.getUserFromToken(token).getRole();
             if (!role.equals("ADMIN")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
