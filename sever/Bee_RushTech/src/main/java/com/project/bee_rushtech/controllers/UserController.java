@@ -71,7 +71,8 @@ public class UserController {
     }
 
     @PutMapping("/user/profile")
-    public ResponseEntity<User> update(@Valid @CookieValue(name = "refresh_token", defaultValue = "") String token,
+    public ResponseEntity<UserResponse> update(
+            @Valid @CookieValue(name = "refresh_token", defaultValue = "") String token,
             @RequestBody User user)
             throws InvalidException {
         if (token.equals("")) {
@@ -90,7 +91,10 @@ public class UserController {
         currentUser.setPhoneNumber(user.getPhoneNumber());
         currentUser.setAddress(user.getAddress());
         User updatedUser = this.userService.handleUpdateUser(currentUser);
-        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+        UserResponse userResponse = new UserResponse(updatedUser.getId(), updatedUser.getFullName(),
+                updatedUser.getEmail(),
+                updatedUser.getPhoneNumber(), updatedUser.getAddress(), updatedUser.getRole());
+        return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
     @GetMapping("/user/profile")
