@@ -69,9 +69,6 @@ public class CartController {
         }
         Long CartId = geCart.getId();
         List<CartItem> cart = cartService.getAllCartItems(CartId);
-        if (cart.isEmpty()) {
-            throw new InvalidException("Your cart is empty!");
-        }
         List<CartItemResponse> cartResponse = new ArrayList<>();
         AtomicLong index = new AtomicLong(1);
         for (CartItem item : cart) {

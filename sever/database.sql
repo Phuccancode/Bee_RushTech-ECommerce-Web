@@ -20,10 +20,10 @@ CREATE TABLE users(
     date_of_birth DATE,
     facebook_account_id INT DEFAULT 0,
     google_account_id INT DEFAULT 0,
-    role_id INT,
+    role_id INT DEFAULT 1,
     refresh_token mediumtext,
     password_reset_token mediumtext,
-    FOREIGN KEY (role_id) REFERENCES roles (id)
+    FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE DEFAULT
 );
 
 
@@ -47,7 +47,7 @@ CREATE TABLE social_accounts(
     email VARCHAR(150) NOT NULL COMMENT 'Email tài khoản',
     name VARCHAR(100) NOT NULL COMMENT 'Tên người dùng',
     user_id INT,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Bảng danh mục sản phẩm(Category)
@@ -70,7 +70,7 @@ CREATE TABLE products (
     category_id INT,
     available TINYINT(1) DEFAULT 1,
     color VARCHAR(20) DEFAULT '',
-    FOREIGN KEY (category_id) REFERENCES categories (id)
+    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
 );
 -- Đặt hàng - orders
 CREATE TABLE orders(
@@ -89,7 +89,7 @@ CREATE TABLE orders(
     tracking_number VARCHAR(100) NOT NULL,
     payment_method VARCHAR(100) NOT NULL,
     active TINYINT(1),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
@@ -102,8 +102,8 @@ CREATE TABLE order_details(
     total_money FLOAT CHECK(total_money >= 0),
 	return_date DATE NOT NULL,
     return_method ENUM('home', 'store'),
-    FOREIGN KEY (product_id) REFERENCES products (id),
-    FOREIGN KEY (order_id) REFERENCES orders (id)
+    FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE
 );
 
 CREATE TABLE carts (

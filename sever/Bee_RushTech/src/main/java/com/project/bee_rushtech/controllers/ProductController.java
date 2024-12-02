@@ -48,10 +48,11 @@ public class ProductController {
 
     @PostMapping("")
     public ResponseEntity<?> createProduct(HttpServletRequest request,
-            @Valid @RequestBody ProductDTO productDTO,
+            @RequestBody ProductDTO productDTO,
             BindingResult result) {
         try {
             String token = request.getHeader("Authorization").replace("Bearer ", "");
+            System.out.println(token);
             String role = this.securityUtil.getUserFromToken(token).getRole();
             if (!role.equals("ADMIN")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
@@ -72,8 +73,11 @@ public class ProductController {
     }
 
     @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadImages(@PathVariable long id, @ModelAttribute List<MultipartFile> files) {
+    public ResponseEntity<?> uploadImages(
+            @PathVariable long id,
+            @RequestParam("files") List<MultipartFile> files) {
         try {
+            Product existingProduct = productService.getProductById(id);
             List<ProductImage> productImages = new ArrayList<>();
             for (MultipartFile file : files) {
                 if (file.getSize() == 0)
