@@ -1,18 +1,17 @@
 package com.project.bee_rushtech.services;
 
 import com.project.bee_rushtech.dtos.OrderDetailDTO;
-import com.project.bee_rushtech.models.CartItem;
+import com.project.bee_rushtech.models.*;
 import com.project.bee_rushtech.repositories.CartItemRepository;
 import com.project.bee_rushtech.utils.errors.*;
-import com.project.bee_rushtech.models.Order;
-import com.project.bee_rushtech.models.OrderDetail;
-import com.project.bee_rushtech.models.Product;
 import com.project.bee_rushtech.repositories.OrderDetailRepository;
 import com.project.bee_rushtech.repositories.OrderRepository;
 import com.project.bee_rushtech.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -37,14 +36,51 @@ public class OrderDetailService implements IOrderDetailService{
                 .findById(cartItem.getProduct().getId())
                 .orElseThrow(() ->
                         new DataNotFoundException("Product not found with id "+cartItem.getProduct().getId()));
+
+        User user = order.getUser();
+
         OrderDetail orderDetail = OrderDetail.builder()
                 .order(order)
                 .product(product)
                 .price(product.getPrice())
                 .totalMoney(product.getPrice()*cartItem.getQuantity())
-                .returnDate(newOrderDetail.getReturnDate())
+                .returnDateTime(newOrderDetail.getReturnDateTime())
                 .numberOfProducts(cartItem.getQuantity())
                 .build();
+
+        // Xử lý khuyến mãi
+        // First time buy
+        long hoursDifference =
+                Duration
+                        .between(orderDetail.getReturnDateTime(),LocalDateTime.now())
+                        .toHours();
+        if(orderRepository.countByUserId(order.getUser().getId()) ==1){
+            if(hoursDifference < 5){
+                orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(1));
+            }
+            else{
+                orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(3));
+            }
+        }else if(orderRepository.countByUserId(order.getUser().getId())>1
+                &&hoursDifference >=8
+        ){
+            orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(1));
+        }
+        if(isEduEmail(user.getEmail())){
+            if(hoursDifference < 5*24){
+                orderDetail.setReturnDateTime(orderDetail
+                        .getReturnDateTime()
+                        .plusHours(hoursDifference/4)
+                );
+            }
+            else{
+                orderDetail.setReturnDateTime(orderDetail
+                        .getReturnDateTime()
+                        .plusHours(2*24)
+                );
+            }
+        }
+        cartItemRepository.delete(cartItem);
         return orderDetailRepository.save(orderDetail);
     }
 
@@ -83,5 +119,16 @@ public class OrderDetailService implements IOrderDetailService{
     @Override
     public List<OrderDetail> findByOrderId(Long orderId) {
         return orderDetailRepository.findByOrderId(orderId);
+    }
+    private boolean isEduEmail(String email) {
+        try {
+            // Tách domain từ email (phần sau @)
+            String domain = email.substring(email.indexOf("@") + 1);
+
+            // Kiểm tra xem domain có chứa ".edu"
+            return domain.contains(".edu");
+        } catch (Exception e) {
+            return false; // Trả về false nếu xảy ra lỗi (vd: email không hợp lệ)
+        }
     }
 }

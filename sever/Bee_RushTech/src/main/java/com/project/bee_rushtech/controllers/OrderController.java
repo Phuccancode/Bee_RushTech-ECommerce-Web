@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -98,12 +97,5 @@ public class OrderController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    // TO DO Get: get list order from user id
-    // method getOders
-    // TO Do Put: update info of a order from user id
-    // method: updateOrder
-    // admin work
-    // To do Delete from user id
-    // method: deleteOrder
-    // Xóa mềm active =false
+
 }

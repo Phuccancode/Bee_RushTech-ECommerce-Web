@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "order_details")
@@ -36,5 +37,5 @@ public class OrderDetail {
     private Float totalMoney;
 
     @Column(name = "return_date", nullable = false)
-    private LocalDate returnDate;
+    private LocalDateTime returnDateTime;
 }

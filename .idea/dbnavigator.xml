@@ -17,7 +17,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54">
-      <console name="aiven" type="STANDARD" schema="shopapp" session="Main">-- Khách hàng khi muốn mua hàng =&gt; phải đăng ký tài khoản =&gt; bảng users
+      <console name="aiven" type="STANDARD" schema="shopapp" session="Main"><![CDATA[-- Khách hàng khi muốn mua hàng => phải đăng ký tài khoản => bảng users
 CREATE TABLE roles(
     id INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL 
@@ -59,13 +59,13 @@ CREATE TABLE categories(
     name varchar(100) NOT NULL DEFAULT '' COMMENT 'Tên danh mục, vd: đồ điện tử'
 );
 
--- Bảng chứa sản phẩm(Product): &quot;laptop macbook air 15 inch 2023&quot;, iphone 15 pro,...
+-- Bảng chứa sản phẩm(Product): "laptop macbook air 15 inch 2023", iphone 15 pro,...
 CREATE TABLE products (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(350) COMMENT 'Tên sản phẩm',
     brand VARCHAR(50) NOT NULL,
-    import_price FLOAT NOT NULL CHECK(import_price&gt;=0),
-    price FLOAT NOT NULL CHECK (price &gt;= 0),
+    import_price FLOAT NOT NULL CHECK(import_price>=0),
+    price FLOAT NOT NULL CHECK (price >= 0),
     thumbnail VARCHAR(300) DEFAULT '',
     description LONGTEXT,
     created_at DATETIME,
@@ -85,7 +85,7 @@ CREATE TABLE orders(
     note VARCHAR(100) DEFAULT '',
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') COMMENT 'Trạng thái đơn hàng',
-    total_money FLOAT CHECK(total_money &gt;= 0),
+    total_money FLOAT CHECK(total_money >= 0),
     shipping_method VARCHAR(100) NOT NULL,
     shipping_address VARCHAR(200) NOT NULL,
     shipping_date DATE NOT NULL,
@@ -100,9 +100,9 @@ CREATE TABLE order_details(
     id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT,
     product_id INT,
-    price FLOAT CHECK(price &gt;= 0),
-    number_of_products INT CHECK(number_of_products &gt; 0),
-    total_money FLOAT CHECK(total_money &gt;= 0),
+    price FLOAT CHECK(price >= 0),
+    number_of_products INT CHECK(number_of_products > 0),
+    total_money FLOAT CHECK(total_money >= 0),
 	return_date DATE NOT NULL,
     return_method ENUM('home', 'store'),
     FOREIGN KEY (product_id) REFERENCES products (id),
@@ -133,30 +133,49 @@ CREATE TABLE product_images(
         FOREIGN KEY (product_id)
         REFERENCES products (id) ON DELETE CASCADE,
     image_url VARCHAR(300)
-);</console>
+);]]></console>
     </connection>
     <connection id="5d9793bb-f68e-432b-bc9a-49cf942647b5">
       <console name="local" type="STANDARD" schema="" session="Main" />
+    </connection>
+    <connection id="afa0d7ec-c26a-4ea6-94fd-3dc034670714">
+      <console name="aiven-Duy2" type="STANDARD" schema="" session="Main" />
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" object-ref="schemas/shopapp/tables/users" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" />
     <connection id="5d9793bb-f68e-432b-bc9a-49cf942647b5" />
+    <connection id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="DaoNgocMinh.products" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="shopapp.users" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="shopapp.cart_items" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="DaoNgocMinh.users" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="shopapp.orders" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" dataset="shopapp.order_details" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" dataset="shopapp.users" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" dataset="shopapp.cart_items" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" dataset="shopapp.carts" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" dataset="shopapp.orders" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" dataset="shopapp.users" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
+  </component>
+  <component name="DBNavigator.Project.MethodExecutionManager">
+    <method-browser />
+    <execution-history>
+      <group-entries value="true" />
+      <execution-inputs />
+    </execution-history>
+    <argument-values-cache />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
@@ -277,6 +296,100 @@ CREATE TABLE product_images(
           <type value="USER_PASSWORD" />
           <user value="root" />
           <deprecated-pwd value="MTIzNDU2" />
+        </database>
+        <properties>
+          <auto-commit value="false" />
+        </properties>
+        <ssh-settings>
+          <active value="false" />
+          <proxy-host value="" />
+          <proxy-port value="22" />
+          <proxy-user value="" />
+          <deprecated-proxy-pwd value="" />
+          <auth-type value="PASSWORD" />
+          <key-file value="" />
+          <key-passphrase value="" />
+        </ssh-settings>
+        <ssl-settings>
+          <active value="false" />
+          <certificate-authority-file value="" />
+          <client-certificate-file value="" />
+          <client-key-file value="" />
+        </ssl-settings>
+        <details>
+          <charset value="UTF-8" />
+          <session-management value="true" />
+          <ddl-file-binding value="true" />
+          <database-logging value="true" />
+          <connect-automatically value="true" />
+          <restore-workspace value="true" />
+          <restore-workspace-deep value="false" />
+          <environment-type value="default" />
+          <connectivity-timeout value="30" />
+          <idle-time-to-disconnect value="30" />
+          <idle-time-to-disconnect-pool value="5" />
+          <credential-expiry-time value="10" />
+          <max-connection-pool-size value="7" />
+          <alternative-statement-delimiter value="" />
+        </details>
+        <debugger>
+          <compile-dependencies value="true" />
+          <tcp-driver-tunneling value="false" />
+          <tcp-host-address value="" />
+          <tcp-port-from value="4000" />
+          <tcp-port-to value="4999" />
+          <debugger-type value="ASK" />
+        </debugger>
+        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false" hide-audit-columns="false">
+          <object-filters />
+          <object-type-filter use-master-settings="true">
+            <object-type name="SCHEMA" enabled="true" />
+            <object-type name="USER" enabled="true" />
+            <object-type name="ROLE" enabled="true" />
+            <object-type name="PRIVILEGE" enabled="true" />
+            <object-type name="CHARSET" enabled="true" />
+            <object-type name="TABLE" enabled="true" />
+            <object-type name="VIEW" enabled="true" />
+            <object-type name="MATERIALIZED_VIEW" enabled="true" />
+            <object-type name="NESTED_TABLE" enabled="true" />
+            <object-type name="COLUMN" enabled="true" />
+            <object-type name="INDEX" enabled="true" />
+            <object-type name="CONSTRAINT" enabled="true" />
+            <object-type name="DATASET_TRIGGER" enabled="true" />
+            <object-type name="DATABASE_TRIGGER" enabled="true" />
+            <object-type name="SYNONYM" enabled="true" />
+            <object-type name="SEQUENCE" enabled="true" />
+            <object-type name="PROCEDURE" enabled="true" />
+            <object-type name="FUNCTION" enabled="true" />
+            <object-type name="PACKAGE" enabled="true" />
+            <object-type name="TYPE" enabled="true" />
+            <object-type name="TYPE_ATTRIBUTE" enabled="true" />
+            <object-type name="ARGUMENT" enabled="true" />
+            <object-type name="DIMENSION" enabled="true" />
+            <object-type name="CLUSTER" enabled="true" />
+            <object-type name="DBLINK" enabled="true" />
+          </object-type-filter>
+        </object-filters>
+      </connection>
+      <connection id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" active="true" signed="true">
+        <database>
+          <name value="aiven-Duy2" />
+          <description value="spring.datasource.url=jdbc:mysql://avnadmin:AVNS_FkW9lAfwkzj5J04vudi@mysql-3ed6b4fb-beerushtech-3c91.e.aivencloud.com:19142/shopapp?ssl-mode=REQUIRED " />
+          <database-type value="MYSQL" />
+          <config-type value="BASIC" />
+          <database-version value="8.0" />
+          <driver-source value="BUNDLED" />
+          <driver-library value="" />
+          <driver value="" />
+          <url-type value="DATABASE" />
+          <host value="mysql-3ed6b4fb-beerushtech-3c91.e.aivencloud.com" />
+          <port value="19142" />
+          <database value="shopapp" />
+          <tns-folder value="" />
+          <tns-profile value="" />
+          <type value="USER_PASSWORD" />
+          <user value="avnadmin" />
+          <deprecated-pwd value="QVZOU19Ga1c5bEFmd2t6ajVKMDR2dWRp" />
         </database>
         <properties>
           <auto-commit value="false" />

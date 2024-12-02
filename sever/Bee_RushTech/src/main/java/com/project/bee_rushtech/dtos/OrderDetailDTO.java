@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -22,7 +23,7 @@ public class OrderDetailDTO {
     private Long cartItemId;
 
     @JsonProperty("return_date")
-    private LocalDate returnDate;
+    private LocalDateTime returnDateTime;
 }
 
 

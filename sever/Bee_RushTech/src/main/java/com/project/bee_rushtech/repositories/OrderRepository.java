@@ -12,5 +12,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Tìm đơn hàng của 1 user nào đó theo id
     Order findByIdAndUserId(Long id, Long userId);
-
+    long countByUserId(Long userId);
 }

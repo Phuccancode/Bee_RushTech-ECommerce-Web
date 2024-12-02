@@ -25,8 +25,8 @@ public class OrderDetailResponse {
     @JsonProperty("total_money")
     private Float totalMoney;
 
-    @JsonProperty("color")
-    private String color;
+    @JsonProperty("return_date")
+    private String returnDateTime;
 
     public static OrderDetailResponse fromOrderDetail(OrderDetail orderDetail) {
         return OrderDetailResponse.builder()
@@ -36,6 +36,7 @@ public class OrderDetailResponse {
                 .price(orderDetail.getPrice())
                 .numberOfProducts(orderDetail.getNumberOfProducts())
                 .totalMoney(orderDetail.getTotalMoney())
+                .returnDateTime(orderDetail.getReturnDateTime().toString())
                 .build();
     }
 }
