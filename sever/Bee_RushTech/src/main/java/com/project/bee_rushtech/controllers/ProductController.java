@@ -73,8 +73,11 @@ public class ProductController {
     }
 
     @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadImages(@PathVariable long id, @ModelAttribute List<MultipartFile> files) {
+    public ResponseEntity<?> uploadImages(
+            @PathVariable long id,
+            @RequestParam("files") List<MultipartFile> files) {
         try {
+            Product existingProduct = productService.getProductById(id);
             List<ProductImage> productImages = new ArrayList<>();
             for (MultipartFile file : files) {
                 if (file.getSize() == 0)
