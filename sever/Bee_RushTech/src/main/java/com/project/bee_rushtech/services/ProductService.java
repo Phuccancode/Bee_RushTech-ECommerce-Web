@@ -38,6 +38,7 @@ public class ProductService implements IProductService {
                 .brand(productDTO.getBrand())
                 .color(productDTO.getColor())
                 .price(productDTO.getPrice())
+                .description(productDTO.getDescription())
                 .importPrice(productDTO.getImportPrice())
                 .thumbnail(productDTO.getThumbnail())
                 .category(existingCategory)
@@ -63,12 +64,14 @@ public class ProductService implements IProductService {
                                                 .name(product.getName())
                                                 .brand(product.getBrand())
                                                 .color(product.getColor())
+                                                .description(product.getDescription())
                                                 .price(product.getPrice())
                                                 .importPrice(product.getImportPrice())
                                                 .thumbnail(product.getThumbnail())
                                                 .categoryId(product.getCategory().getId())
                                                 .available(product.getAvailable())
                                                 .quantity(product.getQuantity())
+                                                .rentedQuantity(product.getRentedQuantity())
                                                 .build();
             productResponse.setCreatedAt(product.getCreatedAt());
             productResponse.setUpdatedAt(product.getUpdatedAt());

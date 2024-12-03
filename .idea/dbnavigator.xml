@@ -154,6 +154,7 @@ CREATE TABLE product_images(
     <connection id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="DaoNgocMinh.carts" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="DaoNgocMinh.products" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="shopapp.users" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="6ee02bc6-2b3f-411b-8656-c07ca8eb1e54" dataset="shopapp.cart_items" active-filter-id="EMPTY_FILTER" />
@@ -165,6 +166,9 @@ CREATE TABLE product_images(
     <filter-actions connection-id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" dataset="shopapp.carts" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="afa0d7ec-c26a-4ea6-94fd-3dc034670714" dataset="shopapp.orders" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" dataset="shopapp.users" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" dataset="bee_rushtech.products" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" dataset="bee_rushtech.orders" active-filter-id="" />
+    <filter-actions connection-id="5d9793bb-f68e-432b-bc9a-49cf942647b5" dataset="bee_rushtech.users" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />

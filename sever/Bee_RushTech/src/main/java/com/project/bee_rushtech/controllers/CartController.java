@@ -41,7 +41,7 @@ public class CartController {
             HttpServletRequest request) throws InvalidException {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         Long userId = this.securityUtil.getUserFromToken(token).getId();
-        if (this.cartService.existsByUserId(userId) == false) {
+        if (!this.cartService.existsByUserId(userId)) {
             User user = this.userService.findById(userId);
             this.cartService.createCart(user);
         }
