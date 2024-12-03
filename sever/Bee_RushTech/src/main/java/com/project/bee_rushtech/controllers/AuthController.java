@@ -82,7 +82,10 @@ public class AuthController {
                 }
                 String hashPassword = this.passwordEncoder.encode(user.getPassword());
                 user.setPassword(hashPassword);
-                user.setRole("CUSTOMER");
+                if (user.getEmail().contains(".edu.vn")) {
+                        user.setRole("STUDENT");
+                } else
+                        user.setRole("CUSTOMER");
                 User newUser = this.userService.handleCreateUser(user);
 
                 UserResponse userResponse = new UserResponse();
@@ -91,7 +94,7 @@ public class AuthController {
                 userResponse.setEmail(newUser.getEmail());
                 userResponse.setPhoneNumber(newUser.getPhoneNumber());
                 userResponse.setAddress(newUser.getAddress());
-                userResponse.setRole("CUSTOMER");
+                userResponse.setRole(newUser.getRole());
                 return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
         }
 

@@ -22,47 +22,45 @@ public class OrderDetailDTO {
     @Min(value = 1, message = "cartItemId >=1")
     private Long cartItemId;
 
-    @JsonProperty("return_date")
-    private LocalDateTime returnDateTime;
+    @JsonProperty("time_renting")
+    private Long timeRenting;
 }
 
-
-
-//package com.project.bee_rushtech.dtos;
+// package com.project.bee_rushtech.dtos;
 //
-//import com.fasterxml.jackson.annotation.JsonProperty;
-//import jakarta.validation.constraints.Min;
-//import lombok.*;
+// import com.fasterxml.jackson.annotation.JsonProperty;
+// import jakarta.validation.constraints.Min;
+// import lombok.*;
 //
-//import java.time.LocalDate;
+// import java.time.LocalDate;
 //
-//@Data
-//@Builder
-//@Getter
-//@Setter
-//@AllArgsConstructor
-//@NoArgsConstructor
-//public class OrderDetailDTO {
-//    @JsonProperty("order_id")
-//    @Min(value = 1, message = "orderId>=1")
-//    private Long orderId;
+// @Data
+// @Builder
+// @Getter
+// @Setter
+// @AllArgsConstructor
+// @NoArgsConstructor
+// public class OrderDetailDTO {
+// @JsonProperty("order_id")
+// @Min(value = 1, message = "orderId>=1")
+// private Long orderId;
 //
-//    @JsonProperty("product_id")
-//    @Min(value = 1, message = "productID >=1")
-//    private Long productId;
+// @JsonProperty("product_id")
+// @Min(value = 1, message = "productID >=1")
+// private Long productId;
 //
-//    @Min(value = 0, message = "price >=0")
-//    private Float price;
+// @Min(value = 0, message = "price >=0")
+// private Float price;
 //
-//    @JsonProperty("number_of_product")
-//    @Min(value = 1, message = "numPro>=1")
-//    private Long numberOfProduct;
+// @JsonProperty("number_of_product")
+// @Min(value = 1, message = "numPro>=1")
+// private Long numberOfProduct;
 //
-//    @JsonProperty("total_money")
-//    @Min(value = 0, message = "total money >=0")
-//    private Float totalMoney;
+// @JsonProperty("total_money")
+// @Min(value = 0, message = "total money >=0")
+// private Float totalMoney;
 //
-//    @JsonProperty("return_date")
-//    private LocalDate returnDate;
-//}
+// @JsonProperty("return_date")
+// private LocalDate returnDate;
+// }
 //

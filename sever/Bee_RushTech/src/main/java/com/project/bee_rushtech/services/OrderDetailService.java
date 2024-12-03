@@ -12,30 +12,30 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-
 
 @RequiredArgsConstructor
 @Service
-public class OrderDetailService implements IOrderDetailService{
+public class OrderDetailService implements IOrderDetailService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final CartItemRepository cartItemRepository;
+
     @Override
     public OrderDetail createOrderDetail(OrderDetailDTO newOrderDetail) throws Exception {
         CartItem cartItem = cartItemRepository
                 .findById(newOrderDetail.getCartItemId())
-                .orElseThrow(() ->
-                        new DataNotFoundException("Cart item not found with id "+newOrderDetail.getCartItemId()));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Cart item not found with id " + newOrderDetail.getCartItemId()));
         Order order = orderRepository
                 .findById(newOrderDetail.getOrderId())
-                .orElseThrow(() ->
-                        new DataNotFoundException("Order not found with id "+newOrderDetail.getOrderId()));
+                .orElseThrow(() -> new DataNotFoundException("Order not found with id " + newOrderDetail.getOrderId()));
         Product product = productRepository
                 .findById(cartItem.getProduct().getId())
-                .orElseThrow(() ->
-                        new DataNotFoundException("Product not found with id "+cartItem.getProduct().getId()));
+                .orElseThrow(
+                        () -> new DataNotFoundException("Product not found with id " + cartItem.getProduct().getId()));
 
         User user = order.getUser();
 
@@ -43,88 +43,93 @@ public class OrderDetailService implements IOrderDetailService{
                 .order(order)
                 .product(product)
                 .price(product.getPrice())
-                .totalMoney(product.getPrice()*cartItem.getQuantity())
-                .returnDateTime(newOrderDetail.getReturnDateTime())
+                .totalMoney(product.getPrice() * cartItem.getQuantity())
                 .numberOfProducts(cartItem.getQuantity())
                 .build();
         // Xử lý khuyến mãi
         // First time buy
-        long hoursDifference =
-                Duration
-                        .between(LocalDateTime.now(),orderDetail.getReturnDateTime())
-                        .toHours();
-        if(hoursDifference<=0){
+        Long hoursDifference = newOrderDetail.getTimeRenting();
+        Long timeRenting = newOrderDetail.getTimeRenting();
+        if (hoursDifference <= 0) {
             throw new InvalidException("Return date must be after current date");
         }
-        if(orderRepository.countByUserId(order.getUser().getId()) ==1){
-            if(hoursDifference < 5){
-                orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(1));
+        if (orderRepository.countByUserId(order.getUser().getId()) == 1) {
+            if (hoursDifference < 5) {
+                // orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(1));
+                timeRenting += 1;
+            } else {
+                // orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(3));
+                timeRenting += 3;
             }
-            else{
-                orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(3));
-            }
-        }else if(orderRepository.countByUserId(order.getUser().getId())>1
-                &&hoursDifference >=8
-        ){
-            orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(1));
+        } else if (orderRepository.countByUserId(order.getUser().getId()) > 1
+                && hoursDifference >= 8) {
+            // orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(1));
+            timeRenting += 1;
         }
-        if(isEduEmail(user.getEmail())){
-            if(hoursDifference < 5*24){
-                orderDetail.setReturnDateTime(orderDetail
-                        .getReturnDateTime()
-                        .plusHours(hoursDifference/4)
-                );
-            }
-            else{
-                orderDetail.setReturnDateTime(orderDetail
-                        .getReturnDateTime()
-                        .plusHours(2*24)
-                );
+        if (isEduEmail(user.getEmail())) {
+            if (hoursDifference < 5 * 24) {
+                // orderDetail.setReturnDateTime(orderDetail
+                // .getReturnDateTime()
+                // .plusHours(hoursDifference / 4));
+                timeRenting += hoursDifference / 4;
+            } else {
+                // orderDetail.setReturnDateTime(orderDetail
+                // .getReturnDateTime()
+                // .plusHours(2 * 24));
+                timeRenting += 2 * 24;
             }
         }
-        // Xử lý số lượng sản phẩm
-        if(product.getQuantity()-cartItem.getQuantity()<0){
-            throw new InvalidException("Product out of stock");
-        }
-        product.setQuantity(product.getQuantity()-cartItem.getQuantity());
+        System.out.println("Time renting: " + timeRenting);
+        orderDetail.setReturnDateTime(LocalDateTime.now().plusHours(timeRenting));
 
-        //xử lý số lượt thuê
-        product.setRentedQuantity(product.getRentedQuantity()+cartItem.getQuantity());
-        productRepository.save(product);
+        // // Xử lý số lượng sản phẩm
+        // if (product.getQuantity() - cartItem.getQuantity() < 0) {
+        // throw new InvalidException("Product out of stock");
+        // }
+        // product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+
+        // // xử lý số lượt thuê
+        // product.setRentedQuantity(product.getRentedQuantity() +
+        // cartItem.getQuantity());
+        // productRepository.save(product);
         // Xóa cart item
-        cartItemRepository.delete(cartItem);
+        // cartItemRepository.delete(cartItem);
         return orderDetailRepository.save(orderDetail);
     }
-
 
     @Override
     public OrderDetail getOrderDetail(Long id) throws Exception {
         return orderDetailRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("Order detail not found with id "+id));
+                .orElseThrow(() -> new DataNotFoundException("Order detail not found with id " + id));
     }
 
-//    @Override
-//    public OrderDetail updateOrderDetail(Long id, OrderDetailDTO newOrderDetailDTO) throws Exception {
-//        Order order = orderRepository
-//                .findById(newOrderDetailDTO.getOrderId())
-//                .orElseThrow(() -> new DataNotFoundException("Order not found with id "+newOrderDetailDTO.getOrderId()));
-//        Product product = productRepository.findById(newOrderDetailDTO.getProductId())
-//                .orElseThrow(() -> new DataNotFoundException("Product not found with id "+newOrderDetailDTO.getProductId()));
-//        return orderDetailRepository.findById(id)//Hàm map này của optional
-//                .map(orderDetail -> {
-//                    orderDetail.setPrice(newOrderDetailDTO.getPrice());
-//                    orderDetail.setNumberOfProducts(newOrderDetailDTO.getNumberOfProduct());
-//                    orderDetail.setTotalMoney(newOrderDetailDTO.getTotalMoney());
-//                    orderDetail.setReturnDate(newOrderDetailDTO.getReturnDate());
-//                    orderDetail.setOrder(order);
-//                    orderDetail.setProduct(product);
-//                    return orderDetailRepository.save(orderDetail);
-//                }).orElseThrow(() -> new DataNotFoundException("Order detail not found with id "+id));
-//
-//    }
+    // @Override
+    // public OrderDetail updateOrderDetail(Long id, OrderDetailDTO
+    // newOrderDetailDTO) throws Exception {
+    // Order order = orderRepository
+    // .findById(newOrderDetailDTO.getOrderId())
+    // .orElseThrow(() -> new DataNotFoundException("Order not found with id
+    // "+newOrderDetailDTO.getOrderId()));
+    // Product product =
+    // productRepository.findById(newOrderDetailDTO.getProductId())
+    // .orElseThrow(() -> new DataNotFoundException("Product not found with id
+    // "+newOrderDetailDTO.getProductId()));
+    // return orderDetailRepository.findById(id)//Hàm map này của optional
+    // .map(orderDetail -> {
+    // orderDetail.setPrice(newOrderDetailDTO.getPrice());
+    // orderDetail.setNumberOfProducts(newOrderDetailDTO.getNumberOfProduct());
+    // orderDetail.setTotalMoney(newOrderDetailDTO.getTotalMoney());
+    // orderDetail.setReturnDate(newOrderDetailDTO.getReturnDate());
+    // orderDetail.setOrder(order);
+    // orderDetail.setProduct(product);
+    // return orderDetailRepository.save(orderDetail);
+    // }).orElseThrow(() -> new DataNotFoundException("Order detail not found with
+    // id "+id));
+    //
+    // }
 
     @Override
-    public void deleteOrderDetail(Long id)  {
+    public void deleteOrderDetail(Long id) {
         orderDetailRepository.deleteById(id);
     }
 
@@ -132,6 +137,7 @@ public class OrderDetailService implements IOrderDetailService{
     public List<OrderDetail> findByOrderId(Long orderId) {
         return orderDetailRepository.findByOrderId(orderId);
     }
+
     private boolean isEduEmail(String email) {
         try {
             // Tách domain từ email (phần sau @)
