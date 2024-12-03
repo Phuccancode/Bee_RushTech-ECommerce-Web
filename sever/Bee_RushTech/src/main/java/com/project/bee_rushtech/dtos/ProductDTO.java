@@ -26,4 +26,9 @@ public class ProductDTO {
     private Long categoryId;
     private Boolean available;
     private String color;
+    @Min(value =0, message ="Quantity must be greater or equal than 0")
+    private Long quantity;
+    @Min(value =0, message ="Rented quantity must be greater or equal than 0")
+    @JsonProperty("rented_quantity")
+    private Long rentedQuantity;
 }

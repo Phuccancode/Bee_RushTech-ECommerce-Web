@@ -47,13 +47,15 @@ public class OrderDetailService implements IOrderDetailService{
                 .returnDateTime(newOrderDetail.getReturnDateTime())
                 .numberOfProducts(cartItem.getQuantity())
                 .build();
-
         // Xử lý khuyến mãi
         // First time buy
         long hoursDifference =
                 Duration
-                        .between(orderDetail.getReturnDateTime(),LocalDateTime.now())
+                        .between(LocalDateTime.now(),orderDetail.getReturnDateTime())
                         .toHours();
+        if(hoursDifference<=0){
+            throw new InvalidException("Return date must be after current date");
+        }
         if(orderRepository.countByUserId(order.getUser().getId()) ==1){
             if(hoursDifference < 5){
                 orderDetail.setReturnDateTime(orderDetail.getReturnDateTime().plusHours(1));
@@ -80,6 +82,13 @@ public class OrderDetailService implements IOrderDetailService{
                 );
             }
         }
+        // Xử lý số lượng sản phẩm
+        product.setQuantity(product.getQuantity()-cartItem.getQuantity());
+
+        //xử lý số lượt thuê
+        product.setRentedQuantity(product.getRentedQuantity()+1);
+        productRepository.save(product);
+        // Xóa cart item
         cartItemRepository.delete(cartItem);
         return orderDetailRepository.save(orderDetail);
     }

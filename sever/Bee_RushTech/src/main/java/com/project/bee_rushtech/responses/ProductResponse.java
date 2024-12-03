@@ -21,4 +21,7 @@ public class ProductResponse extends BaseResponse{
     private Long categoryId;
     private Boolean available;
     private String color;
+    private Long quantity;
+    @JsonProperty("rented_quantity")
+    private Long rentedQuantity;
 }

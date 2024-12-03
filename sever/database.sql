@@ -70,6 +70,8 @@ CREATE TABLE products (
     category_id INT,
     available TINYINT(1) DEFAULT 1,
     color VARCHAR(20) DEFAULT '',
+    quantity INT NOT NULL CHECK(quantity >= 0),
+    rented_quantity INT NOT NULL CHECK(rented_quantity >= 0),
     FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
 );
 -- Đặt hàng - orders

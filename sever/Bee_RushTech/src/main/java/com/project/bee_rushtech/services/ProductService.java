@@ -41,6 +41,9 @@ public class ProductService implements IProductService {
                 .importPrice(productDTO.getImportPrice())
                 .thumbnail(productDTO.getThumbnail())
                 .category(existingCategory)
+                .available(true)
+                .quantity(productDTO.getQuantity())
+                .rentedQuantity(0L)
                 .build();
         return productRepository.save(newProduct);
     }
@@ -64,6 +67,8 @@ public class ProductService implements IProductService {
                                                 .importPrice(product.getImportPrice())
                                                 .thumbnail(product.getThumbnail())
                                                 .categoryId(product.getCategory().getId())
+                                                .available(product.getAvailable())
+                                                .quantity(product.getQuantity())
                                                 .build();
             productResponse.setCreatedAt(product.getCreatedAt());
             productResponse.setUpdatedAt(product.getUpdatedAt());
@@ -89,6 +94,12 @@ public class ProductService implements IProductService {
             existingProduct.setPrice(productDTO.getPrice());
             existingProduct.setDescription(productDTO.getDescription());
             existingProduct.setThumbnail(productDTO.getThumbnail());
+            existingProduct.setBrand(productDTO.getBrand());
+            existingProduct.setColor(productDTO.getColor());
+            existingProduct.setQuantity(productDTO.getQuantity());
+            existingProduct.setImportPrice(productDTO.getImportPrice());
+            existingProduct.setAvailable(productDTO.getAvailable());
+            existingProduct.setQuantity(productDTO.getQuantity());
             return productRepository.save(existingProduct);
         }
         return null;
@@ -96,8 +107,7 @@ public class ProductService implements IProductService {
 
     @Override
     public void deleteProduct(long id) {
-        Optional<Product> optionalProduct = productRepository.findById(id);
-        optionalProduct.ifPresent(productRepository::delete);
+        productRepository.deleteById(id);
     }
 
     @Override
