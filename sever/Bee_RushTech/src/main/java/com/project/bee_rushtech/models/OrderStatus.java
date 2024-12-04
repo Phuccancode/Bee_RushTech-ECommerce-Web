@@ -2,9 +2,9 @@ package com.project.bee_rushtech.models;
 
 //OrderStatus.SHIPPED
 public class OrderStatus {
-    public static final String PENDING      ="pending";
-    public static final String CANCELLED    ="processing";
-    public static final String PROCESSING   ="shipped";
-    public static final String SHIPPED      ="delivered";
-    public static final String DELIVERED    ="cancelled";
+    public static final String PENDING = "pending";
+    public static final String CANCELLED = "cancelled";
+    public static final String PROCESSING = "processing";
+    public static final String SHIPPING = "shipping";
+    public static final String RECEIVE = "received";
 }

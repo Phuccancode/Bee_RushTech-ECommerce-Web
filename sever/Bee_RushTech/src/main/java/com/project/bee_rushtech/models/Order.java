@@ -1,7 +1,5 @@
 package com.project.bee_rushtech.models;
 
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,17 +9,17 @@ import java.util.Date;
 
 //Xác định nó là thực thể
 @Entity
-//Bảng trong db là categories mà class chúng ta lại là Category
+// Bảng trong db là categories mà class chúng ta lại là Category
 // --> dùng @Table để ánh xạ
-@Table(name= "orders")
-@Data //toString
+@Table(name = "orders")
+@Data // toString
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Order {
-    @Id //primary key
+    @Id // primary key
     // No same instance --> when add a new instance --> auto increment
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,25 +28,25 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "fullname", length = 100)
+    @Column(name = "full_name", length = 100)
     private String fullName;
 
     @Column(name = "email", length = 100)
     private String email;
 
-    @Column(name= "phone_number", nullable = false, length = 100)
+    @Column(name = "phone_number", nullable = false, length = 100)
     private String phoneNumber;
 
-    @Column(name= "shipping_address", nullable = false, length = 100)
+    @Column(name = "shipping_address", nullable = false, length = 100)
     private String shippingAddress;
 
     @Column(name = "note", length = 100)
     private String note;
 
-    @Column(name ="order_date")
+    @Column(name = "order_date")
     private Date orderDate;
 
-    @Column(name="status")
+    @Column(name = "status")
     private String status;
 
     @Column(name = "total_money")
@@ -67,7 +65,7 @@ public class Order {
     private String paymentMethod;
 
     @Column(name = "active")
-    private Boolean active;//thuộc về admin
+    private Boolean active;// thuộc về admin
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int LENGTH = 20;

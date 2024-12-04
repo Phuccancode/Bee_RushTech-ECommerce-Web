@@ -43,7 +43,7 @@ public class OrderDetailService implements IOrderDetailService {
                 .order(order)
                 .product(product)
                 .price(product.getPrice())
-                .totalMoney(product.getPrice() * cartItem.getQuantity())
+                .totalMoney(product.getPrice() * cartItem.getQuantity() * newOrderDetail.getTimeRenting())
                 .numberOfProducts(cartItem.getQuantity())
                 .build();
         // Xử lý khuyến mãi
@@ -79,8 +79,9 @@ public class OrderDetailService implements IOrderDetailService {
                 timeRenting += 2 * 24;
             }
         }
-        System.out.println("Time renting: " + timeRenting);
-        orderDetail.setReturnDateTime(LocalDateTime.now().plusHours(timeRenting));
+        // System.out.println("Time renting: " + timeRenting);
+        orderDetail.setTimeRenting(timeRenting);
+        orderDetail.setReturnDateTime(null);
 
         // // Xử lý số lượng sản phẩm
         // if (product.getQuantity() - cartItem.getQuantity() < 0) {
@@ -92,7 +93,7 @@ public class OrderDetailService implements IOrderDetailService {
         // product.setRentedQuantity(product.getRentedQuantity() +
         // cartItem.getQuantity());
         // productRepository.save(product);
-        // Xóa cart item
+        // // Xóa cart item
         // cartItemRepository.delete(cartItem);
         return orderDetailRepository.save(orderDetail);
     }

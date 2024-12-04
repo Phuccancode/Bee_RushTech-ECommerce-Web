@@ -1,6 +1,5 @@
 package com.project.bee_rushtech.models;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,6 +34,9 @@ public class OrderDetail {
 
     @Column(name = "total_money", nullable = false)
     private Float totalMoney;
+
+    @Column(name = "time_renting", nullable = false)
+    private Long timeRenting;
 
     @Column(name = "return_date", nullable = false)
     private LocalDateTime returnDateTime;

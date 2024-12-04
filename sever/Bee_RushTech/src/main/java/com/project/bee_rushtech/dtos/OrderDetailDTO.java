@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDetailDTO {
-    @JsonProperty("order_id")
-    @Min(value = 1, message = "orderId>=1")
     private Long orderId;
 
     @JsonProperty("cart_item_id")

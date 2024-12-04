@@ -66,18 +66,15 @@ public class UserController {
             throw new InvalidException("You are not authorized");
         }
         UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
-                user.getPhoneNumber(), user.getAddress(), user.getRole());
+                user.getPhoneNumber(), user.getAddress(), user.getDateOfBirth(), user.getRole());
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
     @PutMapping("/user/profile")
-    public ResponseEntity<UserResponse> update(
-            @Valid @CookieValue(name = "refresh_token", defaultValue = "") String token,
+    public ResponseEntity<UserResponse> update(HttpServletRequest request,
             @RequestBody User user)
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         Long userId = this.securityUtil.getUserFromToken(token).getId();
         User currentUser = this.userService.findById(userId);
         if (currentUser == null) {
@@ -90,10 +87,12 @@ public class UserController {
         currentUser.setFullName(user.getFullName());
         currentUser.setPhoneNumber(user.getPhoneNumber());
         currentUser.setAddress(user.getAddress());
+        currentUser.setDateOfBirth(user.getDateOfBirth());
         User updatedUser = this.userService.handleUpdateUser(currentUser);
         UserResponse userResponse = new UserResponse(updatedUser.getId(), updatedUser.getFullName(),
                 updatedUser.getEmail(),
-                updatedUser.getPhoneNumber(), updatedUser.getAddress(), updatedUser.getRole());
+                updatedUser.getPhoneNumber(), updatedUser.getAddress(), updatedUser.getDateOfBirth(),
+                updatedUser.getRole());
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
@@ -105,7 +104,7 @@ public class UserController {
         Long userId = this.securityUtil.getUserFromToken(token).getId();
         User user = this.userService.findById(userId);
         UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
-                user.getPhoneNumber(), user.getAddress(), user.getRole());
+                user.getPhoneNumber(), user.getAddress(), user.getDateOfBirth(), user.getRole());
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
@@ -127,7 +126,7 @@ public class UserController {
             throw new InvalidException("User not found");
         }
         UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
-                user.getPhoneNumber(), user.getAddress(), user.getRole());
+                user.getPhoneNumber(), user.getAddress(), user.getDateOfBirth(), user.getRole());
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
@@ -147,7 +146,7 @@ public class UserController {
         List<UserResponse> userResponses = new ArrayList();
         for (User user : users) {
             UserResponse userResponse = new UserResponse(user.getId(), user.getFullName(), user.getEmail(),
-                    user.getPhoneNumber(), user.getAddress(), user.getRole());
+                    user.getPhoneNumber(), user.getAddress(), user.getDateOfBirth(), user.getRole());
             userResponses.add(userResponse);
         }
 
@@ -199,7 +198,8 @@ public class UserController {
         User updatedUser = this.userService.handleUpdateUser(currentUser);
         UserResponse userResponse = new UserResponse(updatedUser.getId(), updatedUser.getFullName(),
                 updatedUser.getEmail(),
-                updatedUser.getPhoneNumber(), updatedUser.getAddress(), updatedUser.getRole());
+                updatedUser.getPhoneNumber(), updatedUser.getAddress(), updatedUser.getDateOfBirth(),
+                updatedUser.getRole());
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 

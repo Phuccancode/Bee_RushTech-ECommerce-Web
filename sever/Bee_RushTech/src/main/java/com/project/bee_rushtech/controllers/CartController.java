@@ -77,7 +77,6 @@ public class CartController {
             res.setProductId(item.getProduct().getId());
             res.setQuantity(item.getQuantity());
             res.setName(item.getProduct().getName());
-            res.setPrice(item.getProduct().getPrice());
             cartResponse.add(res);
         }
 
@@ -105,7 +104,6 @@ public class CartController {
         cartResponse.setProductId(cartItem.getProduct().getId());
         cartResponse.setQuantity(cartItemDTO.getQuantity());
         cartResponse.setName(cartItem.getProduct().getName());
-        cartResponse.setPrice(cartItem.getProduct().getPrice());
         return ResponseEntity.ok(cartResponse);
     }
 

@@ -27,6 +27,8 @@ public class OrderDetailResponse {
     @JsonProperty("total_money")
     private Float totalMoney;
 
+    private Long timeRenting;
+
     @JsonProperty("return_date")
     private String returnDateTime;
 
@@ -39,7 +41,10 @@ public class OrderDetailResponse {
                 .price(orderDetail.getPrice())
                 .numberOfProducts(orderDetail.getNumberOfProducts())
                 .totalMoney(orderDetail.getTotalMoney())
-                .returnDateTime(orderDetail.getReturnDateTime().format(formatter))
+                .timeRenting(orderDetail.getTimeRenting())
+                .returnDateTime(
+                        orderDetail.getReturnDateTime() != null ? orderDetail.getReturnDateTime().format(formatter)
+                                : null)
                 .build();
     }
 }

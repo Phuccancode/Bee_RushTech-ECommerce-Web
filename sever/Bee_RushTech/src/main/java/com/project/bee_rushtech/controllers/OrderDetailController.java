@@ -9,8 +9,12 @@ import com.project.bee_rushtech.services.OrderService;
 import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +39,10 @@ public class OrderDetailController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderDetail(
-            @Valid @PathVariable("id") Long id){
+            @Valid @PathVariable("id") Long id) {
         try {
             OrderDetail orderDetail = orderDetailService.getOrderDetail(id);
             return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
@@ -45,14 +50,14 @@ public class OrderDetailController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("order/{orderId}")
-    public ResponseEntity<?> getOrderDetails(@CookieValue(name = "refresh_token", defaultValue = "") String token,
+    public ResponseEntity<?> getOrderDetails(HttpServletRequest request,
             @PathVariable("orderId") Long orderId) throws InvalidException {
-        if (token.equals("")) {
-            return ResponseEntity.badRequest().body("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").substring(7);
         Long userId = this.securityUtil.getUserFromToken(token).getId();
-        if (orderService.checkOrderOwner(userId, orderId)) {
+
+        if (!orderService.checkOrderOwner(orderId, userId)) {
             return ResponseEntity.badRequest().body("You are not authorized");
         }
         List<OrderDetailResponse> orderDetailResponses = orderDetailService.findByOrderId(orderId)
@@ -63,17 +68,18 @@ public class OrderDetailController {
         return ResponseEntity.ok(orderDetailResponses);
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> updateOrderDetail(
-//            @Valid @PathVariable("id") Long id,
-//            @Valid @RequestBody OrderDetailDTO orderDetailDTO){
-//        try{
-//            OrderDetail orderDetail = orderDetailService.updateOrderDetail(id, orderDetailDTO);
-//            return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
-//        }catch (Exception e){
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
+    // @PutMapping("/{id}")
+    // public ResponseEntity<?> updateOrderDetail(
+    // @Valid @PathVariable("id") Long id,
+    // @Valid @RequestBody OrderDetailDTO orderDetailDTO){
+    // try{
+    // OrderDetail orderDetail = orderDetailService.updateOrderDetail(id,
+    // orderDetailDTO);
+    // return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
+    // }catch (Exception e){
+    // return ResponseEntity.badRequest().body(e.getMessage());
+    // }
+    // }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrderDetail(
             @Valid @PathVariable("id") Long id) {

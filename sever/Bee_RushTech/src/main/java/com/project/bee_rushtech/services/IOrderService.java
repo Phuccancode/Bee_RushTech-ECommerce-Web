@@ -1,5 +1,6 @@
 package com.project.bee_rushtech.services;
 
+import com.project.bee_rushtech.dtos.HandleOrderDTO;
 import com.project.bee_rushtech.dtos.OrderDTO;
 import com.project.bee_rushtech.responses.OrderResponse;
 
@@ -19,5 +20,7 @@ public interface IOrderService {
     OrderResponse findByOrderIdAndUserId(Long orderId, Long userId) throws Exception;
 
     boolean checkOrderOwner(Long orderId, Long userId);
+
+    void handleOrder(HandleOrderDTO handleOrderDTO) throws Exception;
 
 }
