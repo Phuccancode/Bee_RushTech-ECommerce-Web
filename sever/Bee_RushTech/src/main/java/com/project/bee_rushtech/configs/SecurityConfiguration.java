@@ -54,6 +54,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/v1/auth/reset-password").permitAll()
                                 .requestMatchers("/api/v1/auth/logout").permitAll()
                                 .requestMatchers("/api/v1/auth/login-with-google").permitAll()
+                                .requestMatchers("/api/v1/payment/vnp-callback").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
