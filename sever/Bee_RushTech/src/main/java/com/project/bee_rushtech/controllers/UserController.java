@@ -2,16 +2,10 @@ package com.project.bee_rushtech.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.bee_rushtech.dtos.AuthorizeDTO;
 import com.project.bee_rushtech.dtos.ChangePasswordDTO;
 import com.project.bee_rushtech.models.User;
-import com.project.bee_rushtech.responses.LoginResponse;
 import com.project.bee_rushtech.responses.UserResponse;
 import com.project.bee_rushtech.services.GoogleService;
 import com.project.bee_rushtech.services.UserService;
@@ -28,9 +21,7 @@ import com.project.bee_rushtech.utils.annotation.ApiMessage;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -110,13 +101,10 @@ public class UserController {
 
     @GetMapping("/user/{id}")
     @ApiMessage("Get user successfully")
-    public ResponseEntity<UserResponse> getUserById(
-            @CookieValue(name = "refresh_token", defaultValue = "") String token,
+    public ResponseEntity<UserResponse> getUserById(HttpServletRequest request,
             @PathVariable Long id)
             throws InvalidException {
-        if (token.equals("")) {
-            throw new InvalidException("You are not authorized");
-        }
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
         String role = this.securityUtil.getUserFromToken(token).getRole();
         if (!role.equals("ADMIN")) {
             throw new InvalidException("You are not authorized");

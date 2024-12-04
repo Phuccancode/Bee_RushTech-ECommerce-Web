@@ -67,6 +67,12 @@ public class Order {
     @Column(name = "active")
     private Boolean active;// thuộc về admin
 
+    @Column(name = "order_method")
+    private String orderMethod;
+
+    @Column(name = "payment_url")
+    private String paymentUrl;
+
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int LENGTH = 20;
 

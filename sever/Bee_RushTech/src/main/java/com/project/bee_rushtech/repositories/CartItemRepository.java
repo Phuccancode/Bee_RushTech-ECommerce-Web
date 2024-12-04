@@ -7,7 +7,7 @@ import java.util.List;
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findAllByCartId(Long cartId); // Phương thức để tìm các mục giỏ hàng theo
 
-     // Phương thức để tìm mục giỏ hàng theo id
+    // Phương thức để tìm mục giỏ hàng theo id
 
     CartItem findByProductIdAndCartId(Long id, Long cartId); // Phương thức để tìm mục giỏ hàng theo id và cartId
 
@@ -17,5 +17,9 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     boolean existsByProductIdAndCartId(Long productId, Long cartId); // Phương thức để kiểm tra xem mục giỏ hàng có tồn
                                                                      // tại không
+
+    CartItem findByIdAndCartId(Long id, Long cartId); // Phương thức để kiểm tra xem người dùng có phải chủ sở
+                                                      // hữu
+                                                      // của mục giỏ hàng không
 
 }

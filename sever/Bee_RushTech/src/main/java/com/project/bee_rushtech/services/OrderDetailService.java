@@ -3,13 +3,19 @@ package com.project.bee_rushtech.services;
 import com.project.bee_rushtech.dtos.OrderDetailDTO;
 import com.project.bee_rushtech.models.*;
 import com.project.bee_rushtech.repositories.CartItemRepository;
+import com.project.bee_rushtech.repositories.CartRepository;
+import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.errors.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.project.bee_rushtech.repositories.OrderDetailRepository;
 import com.project.bee_rushtech.repositories.OrderRepository;
 import com.project.bee_rushtech.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.Security;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,13 +28,22 @@ public class OrderDetailService implements IOrderDetailService {
     private final ProductRepository productRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final CartItemRepository cartItemRepository;
+    private final SecurityUtil securityUtil;
+    private final CartRepository cartRepository;
 
     @Override
-    public OrderDetail createOrderDetail(OrderDetailDTO newOrderDetail) throws Exception {
+    public OrderDetail createOrderDetail(OrderDetailDTO newOrderDetail, HttpServletRequest request) throws Exception {
+        String token = request.getHeader("Authorization").substring(7);
+        Long userId = this.securityUtil.getUserFromToken(token).getId();
+        Long cartId = cartRepository.findByUserId(userId).getId();
         CartItem cartItem = cartItemRepository
                 .findById(newOrderDetail.getCartItemId())
                 .orElseThrow(() -> new DataNotFoundException(
                         "Cart item not found with id " + newOrderDetail.getCartItemId()));
+
+        if (cartItemRepository.findByIdAndCartId(cartItem.getId(), cartId) == null) {
+            throw new DataNotFoundException("Your cart does not contain this item");
+        }
         Order order = orderRepository
                 .findById(newOrderDetail.getOrderId())
                 .orElseThrow(() -> new DataNotFoundException("Order not found with id " + newOrderDetail.getOrderId()));

@@ -30,9 +30,9 @@ public class OrderDetailController {
 
     @PostMapping("")
     public ResponseEntity<?> createOrderDetail(
-            @Valid @RequestBody OrderDetailDTO orderDetailDTO) {
+            @Valid @RequestBody OrderDetailDTO orderDetailDTO, HttpServletRequest request) {
         try {
-            OrderDetail orderDetail = orderDetailService.createOrderDetail(orderDetailDTO);
+            OrderDetail orderDetail = orderDetailService.createOrderDetail(orderDetailDTO, request);
 
             return ResponseEntity.ok(OrderDetailResponse.fromOrderDetail(orderDetail));
         } catch (Exception e) {

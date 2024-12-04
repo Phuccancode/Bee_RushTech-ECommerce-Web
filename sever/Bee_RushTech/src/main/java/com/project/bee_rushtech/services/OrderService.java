@@ -3,12 +3,18 @@ package com.project.bee_rushtech.services;
 import com.project.bee_rushtech.dtos.HandleOrderDTO;
 import com.project.bee_rushtech.dtos.OrderDTO;
 import com.project.bee_rushtech.dtos.OrderDetailDTO;
+import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.errors.DataNotFoundException;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.project.bee_rushtech.models.Order;
 import com.project.bee_rushtech.models.OrderDetail;
 import com.project.bee_rushtech.models.OrderStatus;
 import com.project.bee_rushtech.models.User;
 import com.project.bee_rushtech.repositories.CartItemRepository;
+import com.project.bee_rushtech.repositories.OrderDetailRepository;
 import com.project.bee_rushtech.repositories.OrderRepository;
 import com.project.bee_rushtech.repositories.UserRepository;
 import com.project.bee_rushtech.responses.OrderResponse;
@@ -31,13 +37,18 @@ public class OrderService implements IOrderService {
         private final ModelMapper modelMapper;
         private final OrderDetailService orderDetailService;
         private final CartItemRepository cartItemRepository;
+        private final PaymentService paymentService;
+        private final SecurityUtil securityUtil;
+        private final OrderDetailRepository orderDetailRepository;
 
         @Override
-        public OrderResponse createOrder(OrderDTO orderDTO) throws Exception {
+        public OrderResponse createOrder(OrderDTO orderDTO, HttpServletRequest request) throws Exception {
+                String token = request.getHeader("Authorization").substring(7);
+                Long userId = securityUtil.getUserFromToken(token).getId();
                 User user = userRepository
-                                .findById(orderDTO.getUserId())
+                                .findById(userId)
                                 .orElseThrow(() -> new DataNotFoundException(
-                                                "User not found with id " + orderDTO.getUserId()));
+                                                "User not found"));
                 modelMapper.typeMap(OrderDTO.class, Order.class)
                                 .addMappings(mapper -> mapper.skip(Order::setId));
                 Order order = new Order();
@@ -46,7 +57,7 @@ public class OrderService implements IOrderService {
                 order.setFullName(orderDTO.getFullName());
                 order.setOrderDate(new Date());
                 order.setStatus(OrderStatus.PENDING);
-
+                order.setOrderMethod(orderDTO.getOrderMethod());
                 // default 5 ngày kể từ ngày hiện tại
                 // LocalDate shippingDate = orderDTO.getShippingDate() == null ?
                 // LocalDate.now().plusDays(5)
@@ -69,29 +80,52 @@ public class OrderService implements IOrderService {
                 Float totalMoney = 0f;
                 for (OrderDetailDTO orderDetailDTO : orderDetailDTOS) {
                         orderDetailDTO.setOrderId(order.getId());
-                        OrderDetail orderDetail = orderDetailService.createOrderDetail(orderDetailDTO);
+                        OrderDetail orderDetail = orderDetailService.createOrderDetail(orderDetailDTO, request);
                         totalMoney += orderDetail.getTotalMoney();
                 }
                 order.setTotalMoney(totalMoney);
+                if (orderDTO.getOrderMethod().equals("home")) {
+                        order.setShippingMethod("GHN");
+
+                } else if (orderDTO.getOrderMethod().equals("store")) {
+                        order.setShippingMethod(null);
+                }
+
+                if (orderDTO.getPaymentMethod().equals("COD")) {
+                        order.setStatus(OrderStatus.CONFIRMED);
+                        order.setPaymentMethod("COD");
+                        order.setShippingDate(LocalDate.now().plusDays(1));
+
+                } else if (orderDTO.getPaymentMethod().equals("CREDIT")) {
+                        order.setStatus(OrderStatus.PENDING);
+                        String paymentUrl = paymentService.createVnPayPayment(request, totalMoney, order.getId());
+                        order.setPaymentUrl(paymentUrl);
+                }
                 orderRepository.save(order);
 
                 return OrderResponse.fromOrder(order);
         }
 
         @Override
-        public OrderResponse getOrder(Long orderId) throws Exception {
+        public OrderResponse getOrder(Long orderId, HttpServletRequest request) throws Exception {
                 Order order = orderRepository.findById(orderId)
                                 .orElseThrow(() -> new DataNotFoundException("Order not found with id " + orderId));
                 return OrderResponse.fromOrder(order);
         }
 
         @Override
-        public OrderResponse updateOrder(Long id, OrderDTO orderDTO) throws Exception {
+        public OrderResponse updateOrder(Long id, OrderDTO orderDTO, HttpServletRequest request) throws Exception {
+                String token = request.getHeader("Authorization").substring(7);
+                Long userId = securityUtil.getUserFromToken(token).getId();
+                if (!checkOrderOwner(id, userId)) {
+                        throw new RuntimeException("You are not the owner of this order");
+                }
+
                 Order order = orderRepository.findById(id)
                                 .orElseThrow(() -> new DataNotFoundException("Order not found with id " + id));
-                User user = userRepository.findById(orderDTO.getUserId())
+                User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new DataNotFoundException(
-                                                "User not found with id " + orderDTO.getUserId()));
+                                                "User not found"));
                 modelMapper.typeMap(OrderDTO.class, Order.class)
                                 .addMappings(mapper -> mapper.skip(Order::setId));
                 modelMapper.map(orderDTO, order);
@@ -104,8 +138,13 @@ public class OrderService implements IOrderService {
         }
 
         @Override
-        public void deleteOrder(Long orderId) throws Exception {
+        public void deleteOrder(Long orderId, HttpServletRequest request) throws Exception {
                 // soft delete
+                String token = request.getHeader("Authorization").substring(7);
+                Long userId = securityUtil.getUserFromToken(token).getId();
+                if (!checkOrderOwner(orderId, userId)) {
+                        throw new RuntimeException("You are not the owner of this order");
+                }
                 Order order = orderRepository.findById(orderId)
                                 .orElseThrow(() -> new DataNotFoundException("Order not found with id " + orderId));
                 order.setActive(false);
@@ -141,7 +180,13 @@ public class OrderService implements IOrderService {
         }
 
         @Override
-        public void handleOrder(HandleOrderDTO handleOrderDTO) throws Exception {
+        public void handleOrder(HandleOrderDTO handleOrderDTO, HttpServletRequest request) throws Exception {
+                String token = request.getHeader("Authorization").substring(7);
+                String role = securityUtil.getUserFromToken(token).getRole();
+                if (!role.equals("ADMIN")) {
+                        throw new RuntimeException("You are not authorized to do this action");
+                }
+
                 Order order = orderRepository.findById(handleOrderDTO.getOrderId())
                                 .orElseThrow(() -> new DataNotFoundException(
                                                 "Order not found with id " + handleOrderDTO.getOrderId()));
@@ -157,6 +202,7 @@ public class OrderService implements IOrderService {
                         for (OrderDetail orderDetail : orderDetails) {
                                 orderDetail.setReturnDateTime(
                                                 LocalDateTime.now().plusHours(orderDetail.getTimeRenting()));
+                                orderDetailRepository.save(orderDetail);
                         }
                 }
 

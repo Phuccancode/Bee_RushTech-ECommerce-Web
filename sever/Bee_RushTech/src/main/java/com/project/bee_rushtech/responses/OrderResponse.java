@@ -51,6 +51,12 @@ public class OrderResponse {
     @JsonProperty("payment_method")
     private String paymentMethod;
 
+    @JsonProperty("order_method")
+    private String orderMethod;
+
+    @JsonProperty("payment_url")
+    private String paymentUrl;
+
     private Boolean active;// thuộc về admin
 
     public static OrderResponse fromOrder(Order order) {
@@ -61,6 +67,16 @@ public class OrderResponse {
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
         orderResponse.setUserId(order.getUser().getId());
         orderResponse.setOrderDate(order.getOrderDate());
+        orderResponse.setStatus(order.getStatus());
+        orderResponse.setTotalMoney(order.getTotalMoney());
+        orderResponse.setShippingMethod(order.getShippingMethod());
+        orderResponse.setShippingAddress(order.getShippingAddress());
+        orderResponse.setShippingDate(order.getShippingDate());
+        orderResponse.setTrackingNumber(order.getTrackingNumber());
+        orderResponse.setPaymentMethod(order.getPaymentMethod());
+        orderResponse.setOrderMethod(order.getOrderMethod());
+        orderResponse.setPaymentUrl(order.getPaymentUrl());
+        orderResponse.setActive(order.getActive());
         // model mapper phai match all fields, neu co 1 filed khong match thi phai skip,
         // khong skip thi gia tri tra ve se bi null het
         return orderResponse;

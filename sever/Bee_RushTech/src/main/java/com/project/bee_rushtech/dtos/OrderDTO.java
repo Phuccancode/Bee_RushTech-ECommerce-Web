@@ -22,9 +22,6 @@ import java.util.List;
 @Setter
 @Builder
 public class OrderDTO {
-    @JsonProperty("user_id")
-    @Min(value = 1, message = "user id must be >=1")
-    private Long userId;
 
     @JsonProperty("full_name")
     private String fullName;
@@ -50,6 +47,9 @@ public class OrderDTO {
 
     @JsonProperty("shipping_date")
     private LocalDate shippingDate;
+
+    @JsonProperty("order_method")
+    private String orderMethod;
 
     @JsonProperty("payment_method")
     private String paymentMethod;

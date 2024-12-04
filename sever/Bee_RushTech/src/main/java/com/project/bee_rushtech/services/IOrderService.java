@@ -4,16 +4,19 @@ import com.project.bee_rushtech.dtos.HandleOrderDTO;
 import com.project.bee_rushtech.dtos.OrderDTO;
 import com.project.bee_rushtech.responses.OrderResponse;
 
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 
 public interface IOrderService {
-    OrderResponse createOrder(OrderDTO orderDTO) throws Exception;
+    OrderResponse createOrder(OrderDTO orderDTO, HttpServletRequest request) throws Exception;
 
-    OrderResponse getOrder(Long orderId) throws Exception;
+    OrderResponse getOrder(Long orderId, HttpServletRequest request) throws Exception;
 
-    OrderResponse updateOrder(Long id, OrderDTO orderDTO) throws Exception;
+    OrderResponse updateOrder(Long id, OrderDTO orderDTO, HttpServletRequest request) throws Exception;
 
-    void deleteOrder(Long orderId) throws Exception;
+    void deleteOrder(Long orderId, HttpServletRequest request) throws Exception;
 
     List<OrderResponse> findByUserId(Long userId);
 
@@ -21,6 +24,6 @@ public interface IOrderService {
 
     boolean checkOrderOwner(Long orderId, Long userId);
 
-    void handleOrder(HandleOrderDTO handleOrderDTO) throws Exception;
+    void handleOrder(HandleOrderDTO handleOrderDTO, HttpServletRequest request) throws Exception;
 
 }
