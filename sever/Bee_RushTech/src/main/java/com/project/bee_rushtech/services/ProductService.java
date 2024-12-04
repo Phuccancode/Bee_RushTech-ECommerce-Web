@@ -60,19 +60,19 @@ public class ProductService implements IProductService {
         // Lấy danh sách sản phẩm theo trang(page) và giới hạn(limit)
         return productRepository.findAll(pageRequest).map(product -> {
             ProductResponse productResponse = ProductResponse.builder()
-                                                .id(product.getId())
-                                                .name(product.getName())
-                                                .brand(product.getBrand())
-                                                .color(product.getColor())
-                                                .description(product.getDescription())
-                                                .price(product.getPrice())
-                                                .importPrice(product.getImportPrice())
-                                                .thumbnail(product.getThumbnail())
-                                                .categoryId(product.getCategory().getId())
-                                                .available(product.getAvailable())
-                                                .quantity(product.getQuantity())
-                                                .rentedQuantity(product.getRentedQuantity())
-                                                .build();
+                    .id(product.getId())
+                    .name(product.getName())
+                    .brand(product.getBrand())
+                    .color(product.getColor())
+                    .description(product.getDescription())
+                    .price(product.getPrice())
+                    .importPrice(product.getImportPrice())
+                    .thumbnail(product.getThumbnail())
+                    .category(product.getCategory())
+                    .available(product.getAvailable())
+                    .quantity(product.getQuantity())
+                    .rentedQuantity(product.getRentedQuantity())
+                    .build();
             productResponse.setCreatedAt(product.getCreatedAt());
             productResponse.setUpdatedAt(product.getUpdatedAt());
             return productResponse;
