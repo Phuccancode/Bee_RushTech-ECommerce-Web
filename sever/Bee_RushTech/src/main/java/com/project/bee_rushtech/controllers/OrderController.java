@@ -94,7 +94,22 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/handle")
+    @GetMapping("admin/getAll")
+    public ResponseEntity<?> getAllOrders(HttpServletRequest request) {
+        try {
+            String token = request.getHeader("Authorization").substring(7);
+            String role = this.securityUtil.getUserFromToken(token).getRole();
+            if (!role.equals("ADMIN")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized");
+            }
+            List<OrderResponse> orderResponses = orderService.findAll();
+            return ResponseEntity.ok(orderResponses);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("admin/handle")
     public ResponseEntity<?> handleOrder(@Valid @RequestBody HandleOrderDTO handleorderDTO,
             HttpServletRequest request) {
         try {

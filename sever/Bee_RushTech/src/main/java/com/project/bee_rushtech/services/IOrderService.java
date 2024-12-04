@@ -26,4 +26,6 @@ public interface IOrderService {
 
     void handleOrder(HandleOrderDTO handleOrderDTO, HttpServletRequest request) throws Exception;
 
+    List<OrderResponse> findAll();
+
 }

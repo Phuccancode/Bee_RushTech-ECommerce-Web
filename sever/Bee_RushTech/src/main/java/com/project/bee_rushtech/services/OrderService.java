@@ -209,4 +209,14 @@ public class OrderService implements IOrderService {
                 orderRepository.save(order);
         }
 
+        @Override
+        public List<OrderResponse> findAll() {
+                List<Order> orders = orderRepository.findAllByOrderByIdDesc();
+                List<OrderResponse> orderResponses = orders
+                                .stream()
+                                .map(OrderResponse::fromOrder)
+                                .collect(Collectors.toList());
+                return orderResponses;
+        }
+
 }
