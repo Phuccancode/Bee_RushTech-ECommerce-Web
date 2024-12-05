@@ -40,6 +40,7 @@ public class OrderService implements IOrderService {
         private final PaymentService paymentService;
         private final SecurityUtil securityUtil;
         private final OrderDetailRepository orderDetailRepository;
+        private final EmailService emailService;
 
         @Override
         public OrderResponse createOrder(OrderDTO orderDTO, HttpServletRequest request) throws Exception {
@@ -58,6 +59,7 @@ public class OrderService implements IOrderService {
                 order.setOrderDate(new Date());
                 order.setStatus(OrderStatus.PENDING);
                 order.setOrderMethod(orderDTO.getOrderMethod());
+                order.setAddress(orderDTO.getAddress());
                 // default 5 ngày kể từ ngày hiện tại
                 // LocalDate shippingDate = orderDTO.getShippingDate() == null ?
                 // LocalDate.now().plusDays(5)
@@ -92,7 +94,6 @@ public class OrderService implements IOrderService {
                 }
 
                 if (orderDTO.getPaymentMethod().equals("COD")) {
-                        order.setStatus(OrderStatus.CONFIRMED);
                         order.setPaymentMethod("COD");
                         order.setShippingDate(LocalDate.now().plusDays(1));
 
@@ -193,10 +194,11 @@ public class OrderService implements IOrderService {
 
                 order.setStatus(handleOrderDTO.getStatus());
 
-                if (handleOrderDTO.getStatus().equals(OrderStatus.SHIPPING)) {
+                if (handleOrderDTO.getStatus().equals(OrderStatus.CONFIRMED)) {
                         order.setShippingDate(LocalDate.now());
                         order.setTrackingNumber(Order.generateTrackingNumber());
                         order.setShippingMethod("GHN");
+                        emailService.handleSendMailShip(order);
                 } else if (handleOrderDTO.getStatus().equals(OrderStatus.RECEIVE)) {
                         List<OrderDetail> orderDetails = orderDetailService.findByOrderId(order.getId());
                         for (OrderDetail orderDetail : orderDetails) {
@@ -206,6 +208,29 @@ public class OrderService implements IOrderService {
                         }
                 }
 
+                orderRepository.save(order);
+        }
+
+        public void handleOrderForCustomer(HandleOrderDTO handleOrderDTO, HttpServletRequest request) throws Exception {
+                String token = request.getHeader("Authorization").substring(7);
+                Long userId = securityUtil.getUserFromToken(token).getId();
+                if (!checkOrderOwner(handleOrderDTO.getOrderId(), userId)) {
+                        throw new RuntimeException("You are not the owner of this order");
+                }
+
+                Order order = orderRepository.findById(handleOrderDTO.getOrderId())
+                                .orElseThrow(() -> new DataNotFoundException(
+                                                "Order not found with id " + handleOrderDTO.getOrderId()));
+
+                order.setStatus(handleOrderDTO.getStatus());
+
+                if (handleOrderDTO.getStatus().equals(OrderStatus.CANCELLED)) {
+                        emailService.handleSendCancelOrder(order);
+                } else if (handleOrderDTO.getStatus().equals(OrderStatus.RETURN)) {
+                        emailService.handleSendMailReturn(order);
+                } else {
+                        throw new RuntimeException("You are not authorized to do this action");
+                }
                 orderRepository.save(order);
         }
 

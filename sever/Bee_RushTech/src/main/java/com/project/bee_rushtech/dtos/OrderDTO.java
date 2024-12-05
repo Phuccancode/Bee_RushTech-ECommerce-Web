@@ -28,6 +28,8 @@ public class OrderDTO {
 
     private String email;
 
+    private String address;
+
     @JsonProperty("phone_number")
     @NotBlank(message = "Phone number is required")
     @Size(min = 5, message = "phone number >=5 characters")

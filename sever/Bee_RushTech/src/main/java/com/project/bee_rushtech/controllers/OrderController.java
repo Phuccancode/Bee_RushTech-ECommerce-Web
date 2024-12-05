@@ -109,6 +109,17 @@ public class OrderController {
         }
     }
 
+    @PutMapping("customer/handle")
+    public ResponseEntity<?> handleOrderCustomer(@Valid @RequestBody HandleOrderDTO handleorderDTO,
+            HttpServletRequest request) {
+        try {
+            orderService.handleOrderForCustomer(handleorderDTO, request);
+            return ResponseEntity.ok("Order handled successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PutMapping("admin/handle")
     public ResponseEntity<?> handleOrder(@Valid @RequestBody HandleOrderDTO handleorderDTO,
             HttpServletRequest request) {

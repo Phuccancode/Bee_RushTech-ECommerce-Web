@@ -98,18 +98,18 @@ public class OrderDetailService implements IOrderDetailService {
         orderDetail.setTimeRenting(timeRenting);
         orderDetail.setReturnDateTime(null);
 
-        // // Xử lý số lượng sản phẩm
-        // if (product.getQuantity() - cartItem.getQuantity() < 0) {
-        // throw new InvalidException("Product out of stock");
-        // }
-        // product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+        // Xử lý số lượng sản phẩm
+        if (product.getQuantity() - cartItem.getQuantity() < 0) {
+            throw new InvalidException("Product out of stock");
+        }
+        product.setQuantity(product.getQuantity() - cartItem.getQuantity());
 
-        // // xử lý số lượt thuê
-        // product.setRentedQuantity(product.getRentedQuantity() +
-        // cartItem.getQuantity());
-        // productRepository.save(product);
-        // // Xóa cart item
-        // cartItemRepository.delete(cartItem);
+        // xử lý số lượt thuê
+        product.setRentedQuantity(product.getRentedQuantity() +
+                cartItem.getQuantity());
+        productRepository.save(product);
+        // Xóa cart item
+        cartItemRepository.delete(cartItem);
         return orderDetailRepository.save(orderDetail);
     }
 

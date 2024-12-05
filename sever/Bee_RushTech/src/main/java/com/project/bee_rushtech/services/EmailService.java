@@ -39,22 +39,20 @@ public class EmailService {
             helper.setFrom("beerushtech@gmail.com");
             helper.setTo(email.getToEmail());
             helper.setSubject(email.getSubject());
-            helper.setText(email.getBody());
+            helper.setText(email.getBody(), true);
             javaMailSender.send(message);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void handleSendMail(HttpServletRequest request, Order order) throws Exception {
-        String token = request.getHeader("Authorization").substring(7);
-        Long userId = securityUtil.getUserFromToken(token).getId();
+    public void handleSendMailShip(Order order) throws Exception {
+        Long userId = order.getUser().getId();
         User user = userService.findById(userId);
         String toEmail = user.getEmail();
         List<OrderDetail> orderDetails = orderDetailService.findByOrderId(order.getId());
 
         StringBuilder result = new StringBuilder();
-        result.append("The rented product:\n");
         for (int i = 0; i < orderDetails.size(); i++) {
             OrderDetail detail = orderDetails.get(i);
 
@@ -64,7 +62,7 @@ public class EmailService {
             // Định dạng chuỗi kết quả
             String timeRenting = String.format("%d Days, %d hours", days, hours);
 
-            result.append(String.format("%d. Product: %s - Quantity: %d - Time Renting: %d hour\n",
+            result.append(String.format("<p> %d. Product: %s - Quantity: %d - Time Renting: %s </p>",
                     i + 1,
                     detail.getProduct().getName(),
                     detail.getNumberOfProducts(),
@@ -72,24 +70,236 @@ public class EmailService {
         }
 
         String subject = "[BeeRushTech] Order Confirmation";
-        String body = "Dear "
-                + user.getFullName() + ",\n\n"
-                + "Thank you for trusting and using our services. Your order number [number] has been confirmed and is being prepared. You can review the order details below:\n\n"
-                + "INFORMATION ABOUT ORDER" + order.getId() + "\n"
-                + result.toString()
-                + "Total Price: " + order.getTotalMoney().longValue() + "\n"
-                + "Payment Method: " + order.getPaymentMethod() + "\n"
-                + "Shipping Number" + order.getTrackingNumber() + "\n\n"
-                + "Delivery Address: " + order.getShippingAddress() + "\n\n"
-                + "To invoke your right to change any information, please contact us at least 24 hours in advance.\n"
-                + "Best,\n" + "Customer Service at Bee RushTech\n\n"
-                + "Attention:\n"
-                + "Before picking up your package, please check that it has not been damaged or tampered with. If the package is damaged, and you are afraid that the parcel may have been opened before it was delivered to you, remember to create a ticket with the courier. Only this way can we determine the guilty party and, if applicable, return your money or arrange another shipment.\n"
-                + "During the rental period, if any damage occurs to the equipment, the renter is responsible for covering the entire repair cost. In the event that the equipment cannot be repaired, the renter must compensate for the cost of purchasing the equipment. Additionally, the renter must compensate for any economic loss resulting from the equipment being unavailable for rental.\n\n"
-                + "Please contact us in the following ways:\n"
-                + "Email:beerushtech@gmail.com\n"
-                + "Phone: 0123456789\n"
-                + "Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.\n";
+        // String body = "Dear "
+        // + user.getFullName() + ",\n\n"
+        // + "Thank you for trusting and using our services. Your order has been
+        // confirmed and is being prepared. You can review the order details below:\n\n"
+        // + "INFORMATION ABOUT ORDER " + order.getId() + "\n"
+        // + result.toString()
+        // + "Total Price: " + order.getTotalMoney().longValue() + " VND" + "\n"
+        // + "Payment Method: " + order.getPaymentMethod() + "\n"
+        // + "Shipping Number: " + order.getTrackingNumber() + "\n\n"
+        // + "Delivery Address: " + order.getAddress() + "\n\n"
+        // + "To invoke your right to change any information, please contact us at least
+        // 24 hours in advance.\n"
+        // + "Best,\n" + "Customer Service at Bee RushTech\n\n"
+        // + "Attention:\n"
+        // + " 1. Before picking up your package, please check that it has not been
+        // damaged or tampered with. If the package is damaged, and you are afraid that
+        // the parcel may have been opened before it was delivered to you, remember to
+        // create a ticket with the courier. Only this way can we determine the guilty
+        // party and, if applicable, return your money or arrange another shipment.\n"
+        // + " 2. During the rental period, if any damage occurs to the equipment, the
+        // renter is responsible for covering the entire repair cost. In the event that
+        // the equipment cannot be repaired, the renter must compensate for the cost of
+        // purchasing the equipment. Additionally, the renter must compensate for any
+        // economic loss resulting from the equipment being unavailable for rental.\n\n"
+        // + "Please contact us in the following ways:\n"
+        // + "Email:beerushtech@gmail.com\n"
+        // + "Phone: 0123456789\n"
+        // + "Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.\n";
+        String body = "<html>"
+                + "<body>"
+                + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
+                + "<p>Thank you for trusting and using our services. Your order has been confirmed and is being prepared. You can review the order details below:</p>"
+                + "<p><strong>INFORMATION ABOUT ORDER " + order.getId() + "</strong></p>"
+                + "<p><strong>The rented product:" + "</strong></p>"
+                + "<p>" + result.toString() + "</p>"
+                + "<p><strong>Total Price: </strong>" + order.getTotalMoney().longValue() + " VND</p>"
+                + "<p><strong>Payment Method: </strong>" + order.getPaymentMethod() + "</p>"
+                + "<p><strong>Shipping Number: </strong>" + order.getTrackingNumber() + "</p>"
+                + "<p><strong>Delivery Address: </strong>" + order.getAddress() + "</p>"
+                + "<br>"
+                + "<p>To invoke your right to change any information, please contact us at least 24 hours in advance.</p>"
+                + "<p>Best,<br> Customer Service at Bee RushTech</p>"
+                + "<br>"
+                + "<p><strong>Attention:</strong></p>"
+                + "<ul>"
+                + "<li style='color: red;'>Before picking up your package, please check that it has not been damaged or tampered with. If the package is damaged, and you are afraid that the parcel may have been opened before it was delivered to you, remember to create a ticket with the courier. Only this way can we determine the guilty party and, if applicable, return your money or arrange another shipment.</li>"
+                + "<li style='color: red;'>During the rental period, if any damage occurs to the equipment, the renter is responsible for covering the entire repair cost. In the event that the equipment cannot be repaired, the renter must compensate for the cost of purchasing the equipment. Additionally, the renter must compensate for any economic loss resulting from the equipment being unavailable for rental.</li>"
+                + "</ul>"
+                + "<br>"
+                + "<p>Please contact us in the following ways:</p>"
+                + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
+                + "<p>Phone: 0869018053</p>"
+                + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.</p>"
+                + "</body>"
+                + "</html>";
+
+        Email email = new Email();
+        email.setToEmail(toEmail);
+        email.setSubject(subject);
+        email.setBody(body);
+        sendEmail(email);
+    }
+
+    public void handleSendMailStore(Order order) throws Exception {
+        Long userId = order.getUser().getId();
+        User user = userService.findById(userId);
+        String toEmail = user.getEmail();
+        List<OrderDetail> orderDetails = orderDetailService.findByOrderId(order.getId());
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < orderDetails.size(); i++) {
+            OrderDetail detail = orderDetails.get(i);
+
+            Long days = detail.getTimeRenting() / 24;
+            Long hours = detail.getTimeRenting() % 24;
+
+            // Định dạng chuỗi kết quả
+            String timeRenting = String.format("%d Days, %d hours", days, hours);
+
+            result.append(String.format("<p> %d. Product: %s - Quantity: %d - Time Renting: %s </p>",
+                    i + 1,
+                    detail.getProduct().getName(),
+                    detail.getNumberOfProducts(),
+                    timeRenting));
+        }
+
+        String subject = "[BeeRushTech] Order Confirmation";
+        String body = "<html>"
+                + "<body>"
+                + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
+                + "<p>Thank you for trusting and using our services. Your order has been confirmed and is ready for pickup at our showroom. Please visit our store to collect your order. You can review the order details below:</p>"
+                + "<p><strong>INFORMATION ABOUT ORDER " + order.getId() + "</strong></p>"
+                + "<p><strong>The rented product:</strong></p>"
+                + "<p>" + result.toString() + "</p>"
+                + "<p><strong>Total Price: </strong>" + order.getTotalMoney().longValue() + " VND</p>"
+                + "<p><strong>Pickup Address: </strong>" + "268, Ly Thuong Kiet, Ward 14, District 10, HCM City"
+                + "</p>"
+                + "<br>"
+                + "<p>To invoke your right to change any information, please contact us at least 24 hours in advance.</p>"
+                + "<p>Best,<br> Customer Service at Bee RushTech</p>"
+                + "<br>"
+                + "<p><strong>Attention:</strong></p>"
+                + "<ul>"
+                + "<li style='color: red;'>Before picking up your package, please check that it has not been damaged or tampered with. If the package is damaged, and you are afraid that the parcel may have been opened before it was delivered to you, remember to create a ticket with the courier. Only this way can we determine the guilty party and, if applicable, return your money or arrange another shipment.</li>"
+                + "<li style='color: red;'>During the rental period, if any damage occurs to the equipment, the renter is responsible for covering the entire repair cost. In the event that the equipment cannot be repaired, the renter must compensate for the cost of purchasing the equipment. Additionally, the renter must compensate for any economic loss resulting from the equipment being unavailable for rental.</li>"
+                + "</ul>"
+                + "<br>"
+                + "<p>Please contact us in the following ways:</p>"
+                + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
+                + "<p>Phone: 0869018053</p>"
+                + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.</p>"
+                + "</body>"
+                + "</html>";
+
+        Email email = new Email();
+        email.setToEmail(toEmail);
+        email.setSubject(subject);
+        email.setBody(body);
+        sendEmail(email);
+    }
+
+    public void handleSendCancelOrder(Order order) throws Exception {
+        Long userId = order.getUser().getId();
+        User user = userService.findById(userId);
+        String toEmail = user.getEmail();
+        List<OrderDetail> orderDetails = orderDetailService.findByOrderId(order.getId());
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < orderDetails.size(); i++) {
+            OrderDetail detail = orderDetails.get(i);
+
+            Long days = detail.getTimeRenting() / 24;
+            Long hours = detail.getTimeRenting() % 24;
+
+            // Định dạng chuỗi kết quả
+            String timeRenting = String.format("%d Days, %d hours", days, hours);
+
+            result.append(String.format("<p> %d. Product: %s - Quantity: %d - Time Renting: %s </p>",
+                    i + 1,
+                    detail.getProduct().getName(),
+                    detail.getNumberOfProducts(),
+                    timeRenting));
+        }
+
+        String subject = "[BeeRushTech] Order Cancellation Confirmation";
+        String body = "<html>"
+                + "<body>"
+                + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
+                + "<p>We have received your request to cancel your order, and we are writing to confirm that your order has been successfully cancelled. Below are the details of your cancelled order:</p>"
+                + "<p><strong>ORDER ID: </strong>" + order.getId() + "</p>"
+                + "<p><strong>The rented product(s):</strong></p>"
+                + "<p>" + result.toString() + "</p>"
+                + "<p><strong>Total Price: </strong>" + order.getTotalMoney().longValue() + " VND</p>"
+                + "<p><strong>Payment Method: </strong>" + order.getPaymentMethod() + "</p>"
+                + "<br>"
+                + "<p>Your cancellation request has been processed successfully. If you have already made a payment, the refund will be processed to your payment method. Please allow a few business days for the refund to be completed.</p>"
+                + "<p>If your cancellation is related to a rental product, you are not required to return the product. If you encounter any issues or have further questions, feel free to reach out to us.</p>"
+                + "<p>Best regards,<br> Customer Service at Bee RushTech</p>"
+                + "<br>"
+                + "<p><strong>Attention:</strong></p>"
+                + "<ul>"
+                + "<li style='color: red;'>If you have any doubts about the cancellation or refund process, please contact us as soon as possible to clarify your concerns.</li>"
+                + "<li style='color: red;'>If you encounter any issues with the refund process, please contact our customer service team for assistance.</li>"
+                + "</ul>"
+                + "<br>"
+                + "<p>You can reach us through the following channels:</p>"
+                + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
+                + "<p>Phone: 0869018053</p>"
+                + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.</p>"
+                + "</body>"
+                + "</html>";
+
+        Email email = new Email();
+        email.setToEmail(toEmail);
+        email.setSubject(subject);
+        email.setBody(body);
+        sendEmail(email);
+    }
+
+    public void handleSendMailReturn(Order order) throws Exception {
+        Long userId = order.getUser().getId();
+        User user = userService.findById(userId);
+        String toEmail = user.getEmail();
+        List<OrderDetail> orderDetails = orderDetailService.findByOrderId(order.getId());
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < orderDetails.size(); i++) {
+            OrderDetail detail = orderDetails.get(i);
+
+            Long days = detail.getTimeRenting() / 24;
+            Long hours = detail.getTimeRenting() % 24;
+
+            // Định dạng chuỗi kết quả
+            String timeRenting = String.format("%d Days, %d hours", days, hours);
+
+            result.append(String.format("<p> %d. Product: %s - Quantity: %d - Time Renting: %s </p>",
+                    i + 1,
+                    detail.getProduct().getName(),
+                    detail.getNumberOfProducts(),
+                    timeRenting));
+        }
+
+        String subject = "[BeeRushTech] Return Reminder for Rental Order";
+        String body = "<html>"
+                + "<body>"
+                + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
+                + "<p>We hope you have had a great experience using our services. This is a reminder that the rental period for the following product(s) has ended, and it is time to return the items:</p>"
+                + "<p><strong>ORDER ID: </strong>" + order.getId() + "</p>"
+                + "<p><strong>The rented product(s):</strong></p>"
+                + "<p>" + result.toString() + "</p>"
+                + "<br>"
+                + "<p>To ensure a smooth return process, please bring the product(s) to our showroom by the due date. Late returns may incur additional charges as per our rental policy. For any questions or assistance, please feel free to contact us.</p>"
+                + "<br>"
+                + "<p><strong>Return Address: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</strong></p>"
+                + "<br>"
+                + "<p>Thank you for your cooperation. We look forward to serving you again in the future!</p>"
+                + "<p>Best regards,<br> Customer Service at Bee RushTech</p>"
+                + "<br>"
+                + "<p><strong>Attention:</strong></p>"
+                + "<ul>"
+                + "<li style='color: red;'>Please ensure that the product(s) are returned in the same condition as when they were rented. Damaged or missing items may result in additional fees.</li>"
+                + "<li style='color: red;'>If you are unable to return the items on time, please contact us immediately to arrange for an extension or alternative solution.</li>"
+                + "</ul>"
+                + "<br>"
+                + "<p>You can reach us through the following channels:</p>"
+                + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
+                + "<p>Phone: 0869018053</p>"
+                + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</p>"
+                + "</body>"
+                + "</html>";
 
         Email email = new Email();
         email.setToEmail(toEmail);
