@@ -76,6 +76,7 @@ public class CartController {
             res.setId(item.getId());
             res.setProductId(item.getProduct().getId());
             res.setQuantity(item.getQuantity());
+            res.setPriceProduct(item.getProduct().getPrice());
             res.setName(item.getProduct().getName());
             cartResponse.add(res);
         }

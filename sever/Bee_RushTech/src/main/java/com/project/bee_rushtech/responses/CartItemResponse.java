@@ -11,6 +11,7 @@ public class CartItemResponse {
     private Long id;
     private Long productId;
     private String name;
+    private Float priceProduct;
     private Long quantity;
 
 }
