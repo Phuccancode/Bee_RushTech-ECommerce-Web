@@ -83,7 +83,8 @@ CREATE TABLE order_details(
     price FLOAT CHECK(price >= 0),
     number_of_products INT CHECK(number_of_products > 0),
     total_money FLOAT CHECK(total_money >= 0),
-	return_date DATE NOT NULL,
+	return_date DATETIME NOT NULL,
+    time_renting INT ,
     return_method ENUM('home', 'store'),
     FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
     FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE
