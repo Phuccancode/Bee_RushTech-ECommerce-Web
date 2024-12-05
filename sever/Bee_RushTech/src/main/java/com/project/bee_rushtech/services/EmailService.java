@@ -249,7 +249,7 @@ public class EmailService {
         sendEmail(email);
     }
 
-    public void handleSendMailReturn(Order order) throws Exception {
+    public void handleSendMailReturn(Order order, String methodReturn) throws Exception {
         Long userId = order.getUser().getId();
         User user = userService.findById(userId);
         String toEmail = user.getEmail();
@@ -272,34 +272,72 @@ public class EmailService {
                     timeRenting));
         }
 
-        String subject = "[BeeRushTech] Return Reminder for Rental Order";
-        String body = "<html>"
-                + "<body>"
-                + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
-                + "<p>We hope you have had a great experience using our services. This is a reminder that the rental period for the following product(s) has ended, and it is time to return the items:</p>"
-                + "<p><strong>ORDER ID: </strong>" + order.getId() + "</p>"
-                + "<p><strong>The rented product(s):</strong></p>"
-                + "<p>" + result.toString() + "</p>"
-                + "<br>"
-                + "<p>To ensure a smooth return process, please bring the product(s) to our showroom by the due date. Late returns may incur additional charges as per our rental policy. For any questions or assistance, please feel free to contact us.</p>"
-                + "<br>"
-                + "<p><strong>Return Address: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</strong></p>"
-                + "<br>"
-                + "<p>Thank you for your cooperation. We look forward to serving you again in the future!</p>"
-                + "<p>Best regards,<br> Customer Service at Bee RushTech</p>"
-                + "<br>"
-                + "<p><strong>Attention:</strong></p>"
-                + "<ul>"
-                + "<li style='color: red;'>Please ensure that the product(s) are returned in the same condition as when they were rented. Damaged or missing items may result in additional fees.</li>"
-                + "<li style='color: red;'>If you are unable to return the items on time, please contact us immediately to arrange for an extension or alternative solution.</li>"
-                + "</ul>"
-                + "<br>"
-                + "<p>You can reach us through the following channels:</p>"
-                + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
-                + "<p>Phone: 0869018053</p>"
-                + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</p>"
-                + "</body>"
-                + "</html>";
+        String subject = "[BeeRushTech] Confirmation of return request";
+
+        String body = "";
+        if (methodReturn.equals("store")) {
+            body = "<html>"
+                    + "<body>"
+                    + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
+                    + "<p>We have received your request to return the following rented product(s). We would like to confirm that we are processing your return request:</p>"
+                    + "<p><strong>ORDER ID: </strong>" + order.getId() + "</p>"
+                    + "<p><strong>The rented product(s):</strong></p>"
+                    + "<p>" + result.toString() + "</p>"
+                    + "<br>"
+                    + "<p>To complete the return process, please bring the product(s) to our showroom by the due date. Kindly note that returning items after the due date may result in additional charges as per our rental policy.</p>"
+                    + "<br>"
+                    + "<p><strong>Return Address: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</strong></p>"
+                    + "<br>"
+                    + "<p>If you need any assistance or have any questions regarding the return process, please do not hesitate to contact us.</p>"
+                    + "<br>"
+                    + "<p>Thank you for choosing our services. We hope to continue serving you in the future!</p>"
+                    + "<p>Best regards,<br> Customer Service at Bee RushTech</p>"
+                    + "<br>"
+                    + "<p><strong>Important Notes:</strong></p>"
+                    + "<ul>"
+                    + "<li style='color: red;'>Please ensure that the product(s) are returned in the same condition as when they were rented. Damaged or missing items may result in additional fees.</li>"
+                    + "<li style='color: red;'>If you are unable to return the items by the due date, please contact us immediately to arrange an extension or an alternative solution.</li>"
+                    + "</ul>"
+                    + "<br>"
+                    + "<p>You can reach us through the following channels:</p>"
+                    + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
+                    + "<p>Phone: 0869018053</p>"
+                    + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</p>"
+                    + "</body>"
+                    + "</html>";
+
+        } else if (methodReturn.equals("home")) {
+            body = "<html>"
+                    + "<body>"
+                    + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
+                    + "<p>We have received your request to return the following rented product(s). We would like to confirm that we are processing your return request:</p>"
+                    + "<p><strong>ORDER ID: </strong>" + order.getId() + "</p>"
+                    + "<p><strong>The rented product(s):</strong></p>"
+                    + "<p>" + result.toString() + "</p>"
+                    + "<br>"
+                    + "<p>To complete the return process, our team will come to your provided address to collect the product(s). Kindly note that any delay in returning the items may result in additional charges as per our rental policy.</p>"
+                    + "<br>"
+                    + "<p><strong>Return Address (Your address):</strong> " + user.getAddress() + "</p>"
+                    + "<br>"
+                    + "<p>If you need any assistance or have any questions regarding the return process, please do not hesitate to contact us.</p>"
+                    + "<br>"
+                    + "<p>Thank you for choosing our services. We hope to continue serving you in the future!</p>"
+                    + "<p>Best regards,<br> Customer Service at Bee RushTech</p>"
+                    + "<br>"
+                    + "<p><strong>Important Notes:</strong></p>"
+                    + "<ul>"
+                    + "<li style='color: red;'>Please ensure that the product(s) are returned in the same condition as when they were rented. Damaged or missing items may result in additional fees.</li>"
+                    + "<li style='color: red;'>If you are unable to return the items by the due date, please contact us immediately to arrange an extension or an alternative solution.</li>"
+                    + "</ul>"
+                    + "<br>"
+                    + "<p>You can reach us through the following channels:</p>"
+                    + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
+                    + "<p>Phone: 0869018053</p>"
+                    + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</p>"
+                    + "</body>"
+                    + "</html>";
+
+        }
 
         Email email = new Email();
         email.setToEmail(toEmail);

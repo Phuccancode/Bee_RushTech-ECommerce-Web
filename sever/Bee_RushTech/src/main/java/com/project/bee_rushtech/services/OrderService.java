@@ -227,7 +227,12 @@ public class OrderService implements IOrderService {
                 if (handleOrderDTO.getStatus().equals(OrderStatus.CANCELLED)) {
                         emailService.handleSendCancelOrder(order);
                 } else if (handleOrderDTO.getStatus().equals(OrderStatus.RETURN)) {
-                        emailService.handleSendMailReturn(order);
+                        if (handleOrderDTO.getReturnMethod().equals("store")) {
+                                emailService.handleSendMailReturn(order, "store");
+                        } else if (handleOrderDTO.getReturnMethod().equals("home")) {
+                                emailService.handleSendMailReturn(order, "home");
+                        }
+
                 } else {
                         throw new RuntimeException("You are not authorized to do this action");
                 }
