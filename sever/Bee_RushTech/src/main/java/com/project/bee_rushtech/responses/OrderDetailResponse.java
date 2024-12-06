@@ -1,5 +1,7 @@
 package com.project.bee_rushtech.responses;
 
+import java.time.format.DateTimeFormatter;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.bee_rushtech.models.OrderDetail;
 import lombok.Builder;
@@ -25,10 +27,13 @@ public class OrderDetailResponse {
     @JsonProperty("total_money")
     private Float totalMoney;
 
+    private Long timeRenting;
+
     @JsonProperty("return_date")
     private String returnDateTime;
 
     public static OrderDetailResponse fromOrderDetail(OrderDetail orderDetail) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return OrderDetailResponse.builder()
                 .id(orderDetail.getId())
                 .orderId(orderDetail.getOrder().getId())
@@ -36,7 +41,10 @@ public class OrderDetailResponse {
                 .price(orderDetail.getPrice())
                 .numberOfProducts(orderDetail.getNumberOfProducts())
                 .totalMoney(orderDetail.getTotalMoney())
-                .returnDateTime(orderDetail.getReturnDateTime().toString())
+                .timeRenting(orderDetail.getTimeRenting())
+                .returnDateTime(
+                        orderDetail.getReturnDateTime() != null ? orderDetail.getReturnDateTime().format(formatter)
+                                : null)
                 .build();
     }
 }

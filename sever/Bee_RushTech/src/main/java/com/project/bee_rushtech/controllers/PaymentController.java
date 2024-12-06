@@ -15,24 +15,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 
 // Thông tin tài khoản dùng để test nhé
-//Ngân hàng	NCB
-//Số thẻ	9704198526191432198
-//Tên chủ thẻ	NGUYEN VAN A
-//Ngày phát hành	07/15
-//Mật khẩu OTP	123456
+// Ngân hàng NCB
+// Số thẻ 9704198526191432198
+// Tên chủ thẻ NGUYEN VAN A
+// Ngày phát hành 07/15
+// Mật khẩu OTP 123456
 public class PaymentController {
     private final PaymentService paymentService;
+
     @GetMapping("/vn-pay")
-    public ResponseObject<PaymentDTO.VNPayResponse> pay(HttpServletRequest request) {
-        return new ResponseObject<>(HttpStatus.OK, "Success", paymentService.createVnPayPayment(request));
+    public ResponseObject<String> pay(HttpServletRequest request) {
+        return new ResponseObject<>(HttpStatus.OK, "Success",
+                paymentService.createVnPayPayment(request, 1000000.2F, 1L));
     }
+
     @GetMapping("/vn-pay-callback")
     public ResponseObject<PaymentDTO.VNPayResponse> payCallbackHandler(HttpServletRequest request) {
-        String status = request.getParameter("vnp_ResponseCode");
-        if (status.equals("00")) {
-            return new ResponseObject<>(HttpStatus.OK, "Success", new PaymentDTO.VNPayResponse("00", "Success", ""));
-        } else {
-            return new ResponseObject<>(HttpStatus.BAD_REQUEST, "Failed", null);
+        try {
+            String status = request.getParameter("vnp_ResponseCode");
+            if (status.equals("00")) {
+                Long orderId = Long.parseLong(request.getParameter("vnp_OrderInfo"));
+                paymentService.handlePaymentOrder(orderId);
+                return new ResponseObject<>(HttpStatus.OK, "Success",
+                        new PaymentDTO.VNPayResponse("00", "Payment success for order " + orderId));
+            } else {
+                return new ResponseObject<>(HttpStatus.BAD_REQUEST, "Failed", null);
+            }
+        } catch (Exception e) {
+            return new ResponseObject<>(HttpStatus.BAD_REQUEST, "This URL is not valid", null);
         }
     }
 }

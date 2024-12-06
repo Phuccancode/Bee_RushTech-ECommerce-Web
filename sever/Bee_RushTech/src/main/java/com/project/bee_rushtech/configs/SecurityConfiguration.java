@@ -51,9 +51,12 @@ public class SecurityConfiguration {
                                 // .requestMatchers("get-user").authenticated()
                                 .requestMatchers("/api/v1/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/products").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
                                 .requestMatchers("/api/v1/auth/reset-password").permitAll()
                                 .requestMatchers("/api/v1/auth/logout").permitAll()
                                 .requestMatchers("/api/v1/auth/login-with-google").permitAll()
+                                .requestMatchers("/api/v1/payment/vn-pay-callback").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -61,7 +64,7 @@ public class SecurityConfiguration {
                 // exceptions -> exceptions
                 // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
                 // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
-                .formLogin(Customizer.withDefaults())
+                // .formLogin(Customizer.withDefaults())
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler((request, response, authentication) -> {
                             OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;

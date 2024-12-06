@@ -1,6 +1,8 @@
 package com.project.bee_rushtech.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.bee_rushtech.models.CartItem;
+
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.Min;
@@ -11,6 +13,7 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,18 +22,17 @@ import java.util.Date;
 @Setter
 @Builder
 public class OrderDTO {
-    @JsonProperty("user_id")
-    @Min(value =1, message = "user id must be >=1")
-    private Long userId;
 
     @JsonProperty("full_name")
     private String fullName;
 
     private String email;
 
+    private String address;
+
     @JsonProperty("phone_number")
     @NotBlank(message = "Phone number is required")
-    @Size(min= 5, message = "phone number >=5 characters")
+    @Size(min = 5, message = "phone number >=5 characters")
     private String phoneNumber;
 
     private String note;
@@ -48,7 +50,13 @@ public class OrderDTO {
     @JsonProperty("shipping_date")
     private LocalDate shippingDate;
 
+    @JsonProperty("order_method")
+    private String orderMethod;
+
     @JsonProperty("payment_method")
     private String paymentMethod;
+
+    @JsonProperty("list_order_detail")
+    private List<OrderDetailDTO> listOrderDetail;
 
 }

@@ -29,13 +29,8 @@ public class User extends BaseEntity {
     private String password;
     private String address;
     private String phoneNumber;
-
     private Boolean isActive;
-
     private Date dateOfBirth;
-
-    private String facebookAccountId;
-    private String googleAccountId;
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
 

@@ -1,6 +1,8 @@
 package com.project.bee_rushtech.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.bee_rushtech.models.Category;
+
 import lombok.*;
 
 @Getter
@@ -8,7 +10,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductResponse extends BaseResponse{
+public class ProductResponse extends BaseResponse {
     private Long id;
     private String name;
     private Float price;
@@ -17,8 +19,7 @@ public class ProductResponse extends BaseResponse{
     private String thumbnail;
     private String description;
     private String brand;
-    @JsonProperty("category_id")
-    private Long categoryId;
+    private Category category;
     private Boolean available;
     private String color;
     private Long quantity;
