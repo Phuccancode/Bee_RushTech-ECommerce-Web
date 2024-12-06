@@ -1,5 +1,6 @@
 package com.project.bee_rushtech.utils;
 
+import com.project.bee_rushtech.utils.annotation.IgnoreRestResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
@@ -17,9 +18,14 @@ import jakarta.servlet.http.HttpServletResponse;
 public class FormatRestResponse implements ResponseBodyAdvice<Object> {
 
     @Override
-    public boolean supports(MethodParameter returnType, Class onverterType) {
-        return true;
+    public boolean supports(MethodParameter returnType, Class converterType) {
+        // Bỏ qua các controller được đánh dấu @IgnoreRestResponse
+        if (returnType.getContainingClass().isAnnotationPresent(IgnoreRestResponse.class)) {
+            return false;
+        }
+        return !org.springframework.core.io.Resource.class.isAssignableFrom(returnType.getParameterType());
     }
+
 
     @Override
     public Object beforeBodyWrite(

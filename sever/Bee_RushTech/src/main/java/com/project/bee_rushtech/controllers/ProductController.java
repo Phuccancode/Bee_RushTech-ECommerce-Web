@@ -79,33 +79,43 @@ public class ProductController {
             @RequestParam("files") MultipartFile file) {
         try {
             Product existingProduct = productService.getProductById(id);
-            // check the size and format of file
+
+            // Kiểm tra kích thước và định dạng tệp
             if (file.getSize() > 10 * 1024 * 1024) {
                 return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                         .body("File is too large! Max size is 10MB");
             }
-            // Get the format of file
+
+            // Lấy định dạng của tệp
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("File must be an image");
             }
-            java.nio.file.Path uploadDir = Paths.get("upload");
-            // Check and create folder if it doesnt exist
+
+            // Đường dẫn đến thư mục static/public/images
+            java.nio.file.Path uploadDir = Paths.get("src/main/resources/static/public/images");
+
+            // Kiểm tra và tạo thư mục nếu không tồn tại
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
+
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            // path to destination file
+
+            // Đường dẫn đến file đích
             java.nio.file.Path destination = Paths.get(uploadDir.toString(), filename);
             Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-            java.nio.file.Path imagePath = Paths.get("upload/"+filename);
-            existingProduct.setThumbnail(imagePath.toString());
 
-            return ResponseEntity.ok("upload image successfully");
+            // Lấy URL của ảnh đã lưu
+            String imageUrl = "localhost:9090/images/" + filename;
+
+            // Cập nhật URL vào sản phẩm trong cơ sở dữ liệu
+            return ResponseEntity.ok(productService.updateImage(id, imageUrl));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
 //    @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 //    public ResponseEntity<?> uploadImages(
@@ -138,22 +148,23 @@ public class ProductController {
 //            return ResponseEntity.badRequest().body(e.getMessage());
 //        }
 //    }
+
+//    private String storeFile(MultipartFile file) throws IOException {
+//        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+//        // Add UUID in forward of file name to make it unique
+//        String uniqueFilename = UUID.randomUUID().toString() + " " + filename;
+//        // Path to folder storing file
+//        java.nio.file.Path uploadDir = Paths.get("upload");
+//        // Check and create folder if it doesnt exist
+//        if (!Files.exists(uploadDir)) {
+//            Files.createDirectories(uploadDir);
+//        }
+//        // path to destination file
+//        java.nio.file.Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
 //
-    private String storeFile(MultipartFile file) throws IOException {
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
-        // Add UUID in forward of file name to make it unique
-        String uniqueFilename = UUID.randomUUID().toString() + " " + filename;
-        // Path to folder storing file
-        java.nio.file.Path uploadDir = Paths.get("upload");
-        // Check and create folder if it doesnt exist
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        // path to destination file
-        java.nio.file.Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
-        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-        return uniqueFilename;
-    }
+//        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+//        return uniqueFilename;
+//    }
 
 //    @GetMapping("images/{imageName}")
 //    public ResponseEntity<Resource> viewImage(@PathVariable String imageName) {

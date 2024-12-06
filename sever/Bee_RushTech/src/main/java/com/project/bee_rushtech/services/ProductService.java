@@ -107,7 +107,14 @@ public class ProductService implements IProductService {
         }
         return null;
     }
-
+    @Override
+    public String updateImage(long id, String path) throws DataNotFoundException {
+        Product existingProduct = productRepository.findById(id).orElseThrow(() -> new DataNotFoundException(
+                "Cannot find category with id: " + id));
+        existingProduct.setThumbnail(path);
+        productRepository.save(existingProduct);
+        return "update successfull at "+path;
+    }
     @Override
     public void deleteProduct(long id) {
         productRepository.deleteById(id);
