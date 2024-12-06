@@ -76,35 +76,69 @@ public class ProductController {
     @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadImages(
             @PathVariable long id,
-            @RequestParam("files") List<MultipartFile> files) {
+            @RequestParam("files") MultipartFile file) {
         try {
             Product existingProduct = productService.getProductById(id);
-            List<ProductImage> productImages = new ArrayList<>();
-            for (MultipartFile file : files) {
-                if (file.getSize() == 0)
-                    continue;
-                // check the size and format of file
-                if (file.getSize() > 10 * 1024 * 1024) {
-                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                            .body("File is too large! Max size is 10MB");
-                }
-                // Get the format of file
-                String contentType = file.getContentType();
-                if (contentType == null || !contentType.startsWith("image/")) {
-                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("File must be an image");
-                }
-                String filename = storeFile(file);
-                productImages.add(productService.createProductImage(ProductImageDTO.builder()
-                        .productId(id)
-                        .imageUrl(filename)
-                        .build()));
+            // check the size and format of file
+            if (file.getSize() > 10 * 1024 * 1024) {
+                return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                        .body("File is too large! Max size is 10MB");
             }
-            return ResponseEntity.ok(productImages);
+            // Get the format of file
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("File must be an image");
+            }
+            java.nio.file.Path uploadDir = Paths.get("upload");
+            // Check and create folder if it doesnt exist
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            // path to destination file
+            java.nio.file.Path destination = Paths.get(uploadDir.toString(), filename);
+            Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+            java.nio.file.Path imagePath = Paths.get("upload/"+filename);
+            existingProduct.setThumbnail(imagePath.toString());
+
+            return ResponseEntity.ok("upload image successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+//    @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> uploadImages(
+//            @PathVariable long id,
+//            @RequestParam("files") List<MultipartFile> files) {
+//        try {
+//            Product existingProduct = productService.getProductById(id);
+//            List<ProductImage> productImages = new ArrayList<>();
+//            for (MultipartFile file : files) {
+//                if (file.getSize() == 0)
+//                    continue;
+//                // check the size and format of file
+//                if (file.getSize() > 10 * 1024 * 1024) {
+//                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+//                            .body("File is too large! Max size is 10MB");
+//                }
+//                // Get the format of file
+//                String contentType = file.getContentType();
+//                if (contentType == null || !contentType.startsWith("image/")) {
+//                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("File must be an image");
+//                }
+//                String filename = storeFile(file);
+//                productImages.add(productService.createProductImage(ProductImageDTO.builder()
+//                        .productId(id)
+//                        .imageUrl(filename)
+//                        .build()));
+//            }
+//            return ResponseEntity.ok(productImages);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
     private String storeFile(MultipartFile file) throws IOException {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         // Add UUID in forward of file name to make it unique
@@ -121,26 +155,14 @@ public class ProductController {
         return uniqueFilename;
     }
 
-    @GetMapping("/images/{imageName}")
-    public ResponseEntity<?> viewImage(@PathVariable String imageName) {
-        try {
-            java.nio.file.Path imagePath = Paths.get("upload/"+imageName);
-            UrlResource resource = new UrlResource(imagePath.toUri());
-
-            if (resource.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            } else {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(new UrlResource(Paths.get("upload/notfound.jpeg").toUri()));
-                //return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+//    @GetMapping("images/{imageName}")
+//    public ResponseEntity<Resource> viewImage(@PathVariable String imageName) {
+//        try {
+//            java.nio.file.Path imagePath = Paths.get("upload/" + imageName);
+//        } catch (Exception e) {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 
     // http://localhost:9090/api/v1/products?page=1&limit=10
     @GetMapping("")
