@@ -6,6 +6,7 @@ import com.project.bee_rushtech.services.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,14 +31,17 @@ public class PaymentController {
     }
 
     @GetMapping("/vn-pay-callback")
-    public ResponseObject<PaymentDTO.VNPayResponse> payCallbackHandler(HttpServletRequest request) {
+    public ResponseEntity<?> payCallbackHandler(HttpServletRequest request) {
         try {
             String status = request.getParameter("vnp_ResponseCode");
+            String redirectUrl;
             if (status.equals("00")) {
                 Long orderId = Long.parseLong(request.getParameter("vnp_OrderInfo"));
                 paymentService.handlePaymentOrder(orderId);
-                return new ResponseObject<>(HttpStatus.OK, "Success",
-                        new PaymentDTO.VNPayResponse("00", "Payment success for order " + orderId));
+                redirectUrl = "http://localhost:3000/success";
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .header("Location", redirectUrl)
+                        .body(null);
             } else {
                 return new ResponseObject<>(HttpStatus.BAD_REQUEST, "Failed", null);
             }
