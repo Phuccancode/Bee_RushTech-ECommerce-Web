@@ -57,6 +57,8 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/v1/auth/logout").permitAll()
                                 .requestMatchers("/api/v1/auth/login-with-google").permitAll()
                                 .requestMatchers("/api/v1/payment/vn-pay-callback").permitAll()
+
+                                .requestMatchers("/static/**", "/public/**", "/images/**").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -65,14 +67,15 @@ public class SecurityConfiguration {
                 // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
                 // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
                 // .formLogin(Customizer.withDefaults())
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler((request, response, authentication) -> {
-                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
-                            String accessToken = token.getAuthorizedClientRegistrationId();
+                // .oauth2Login(oauth2 -> oauth2
+                // .successHandler((request, response, authentication) -> {
+                // OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+                // String accessToken = token.getAuthorizedClientRegistrationId();
 
-                            // Store or process the access token as needed
-                            response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after successful login
-                        }))
+                // // Store or process the access token as needed
+                // response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after
+                // successful login
+                // }))
 
                 .logout(Customizer.withDefaults());
 
