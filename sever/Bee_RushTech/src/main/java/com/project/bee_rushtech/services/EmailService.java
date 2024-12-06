@@ -51,13 +51,20 @@ public class EmailService {
         User user = userService.findById(userId);
         String toEmail = user.getEmail();
         List<OrderDetail> orderDetails = orderDetailService.findByOrderId(order.getId());
-
+        Float collateral = 0f;
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < orderDetails.size(); i++) {
             OrderDetail detail = orderDetails.get(i);
 
             Long days = detail.getTimeRenting() / 24;
             Long hours = detail.getTimeRenting() % 24;
+            if (detail.getProduct().getImportPrice() < 10000000) {
+                collateral += 1000000;
+            } else if (detail.getProduct().getImportPrice() < 20000000) {
+                collateral += 2000000;
+            } else {
+                collateral += 3000000;
+            }
 
             // Định dạng chuỗi kết quả
             String timeRenting = String.format("%d Days, %d hours", days, hours);
@@ -111,6 +118,8 @@ public class EmailService {
                 + "<p><strong>Delivery Address: </strong>" + order.getAddress() + "</p>"
                 + "<br>"
                 + "<p>To invoke your right to change any information, please contact us at least 24 hours in advance.</p>"
+                + "<p>Because the value of your product is too high, please provide a collateral of "
+                + collateral.longValue() + " VND when you receive the item from shipper.</p>"
                 + "<p>Best,<br> Customer Service at Bee RushTech</p>"
                 + "<br>"
                 + "<p><strong>Attention:</strong></p>"
@@ -138,6 +147,7 @@ public class EmailService {
         User user = userService.findById(userId);
         String toEmail = user.getEmail();
         List<OrderDetail> orderDetails = orderDetailService.findByOrderId(order.getId());
+        Float collateral = 0f;
 
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < orderDetails.size(); i++) {
@@ -145,6 +155,13 @@ public class EmailService {
 
             Long days = detail.getTimeRenting() / 24;
             Long hours = detail.getTimeRenting() % 24;
+            if (detail.getProduct().getImportPrice() < 10000000) {
+                collateral += 1000000;
+            } else if (detail.getProduct().getImportPrice() < 20000000) {
+                collateral += 2000000;
+            } else {
+                collateral += 3000000;
+            }
 
             // Định dạng chuỗi kết quả
             String timeRenting = String.format("%d Days, %d hours", days, hours);
@@ -169,6 +186,8 @@ public class EmailService {
                 + "</p>"
                 + "<br>"
                 + "<p>To invoke your right to change any information, please contact us at least 24 hours in advance.</p>"
+                + "<p>Because the value of your product is too high, please provide a collateral of "
+                + collateral.longValue() + " VND when you come to the store to pick up the item.</p>"
                 + "<p>Best,<br> Customer Service at Bee RushTech</p>"
                 + "<br>"
                 + "<p><strong>Attention:</strong></p>"
