@@ -204,20 +204,13 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.OK).body(null);
         }
 
-        @GetMapping("/login-with-google")
+        @PostMapping("/login-with-google")
         @ApiMessage("Login successfully")
-        public ResponseEntity<LoginResponse> getAccessToken(OAuth2AuthenticationToken authentication,
-                        HttpServletResponse response) {
-                String registrationId = authentication.getAuthorizedClientRegistrationId();
-
-                OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
-                                registrationId, authentication.getName());
-
-                String accessToken = client.getAccessToken().getTokenValue();
-
-                Map userInfoResponse = googleUserInfoService.getUserInfo(accessToken);
-                String email = (String) userInfoResponse.get("email");
-                String name = (String) userInfoResponse.get("name");
+        public ResponseEntity<LoginResponse> getAccessToken(@RequestBody Map<String, String> requestBody) {
+                String accessToken = requestBody.get("token");
+                Map<String, String> info = GoogleService.decodeIdToken(accessToken);
+                String email = info.get("email");
+                String name = info.get("name");
                 if (this.userService.checkUserExists(email) == false) {
                         User user = new User();
                         user.setEmail(email);
@@ -234,7 +227,8 @@ public class AuthController {
                                 userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(email, userLogin);
-                String refreshToken = this.securityUtil.createRefreshToken(email, resLoginDTO);
+                String refreshToken = this.securityUtil.createRefreshToken(email,
+                                resLoginDTO);
                 resLoginDTO.setAccessToken(access_token);
                 this.userService.updateUserToken(refreshToken, email);
                 return ResponseEntity.ok()

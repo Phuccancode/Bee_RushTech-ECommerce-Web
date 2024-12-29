@@ -23,6 +23,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,12 +52,12 @@ public class SecurityConfiguration {
                                 // .requestMatchers("/api/v1/auth/login-with-google").authenticated()
                                 // .requestMatchers("get-user").authenticated()
                                 .requestMatchers("/api/v1/auth/login").permitAll()
+                                .requestMatchers("/api/v1/auth/login-with-google").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/products").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
                                 .requestMatchers("/api/v1/auth/reset-password").permitAll()
                                 .requestMatchers("/api/v1/auth/logout").permitAll()
-                                .requestMatchers("/api/v1/auth/login-with-google").permitAll()
                                 .requestMatchers("/api/v1/payment/vn-pay-callback").permitAll()
 
                                 .requestMatchers("/static/**", "/public/**", "/images/**").permitAll()
@@ -67,20 +69,19 @@ public class SecurityConfiguration {
                 // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
                 // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
                 // .formLogin(Customizer.withDefaults())
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler((request, response, authentication) -> {
-                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
-                            String accessToken = token.getAuthorizedClientRegistrationId();
+                // .oauth2Login(oauth2 -> oauth2
+                // .successHandler((request, response, authentication) -> {
+                // OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+                // String accessToken = token.getAuthorizedClientRegistrationId();
 
-                            // Store or process the access token as needed
-                            response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after
-                            // successful login
-                        }))
+                // // Store or process the access token as needed
+                // // response.sendRedirect("/api/v1/auth/login-with-google"); // redirect after
+                // // successful login
+                // }))
 
-                .logout(Customizer.withDefaults());
+                .logout(Customizer.withDefaults())
 
-        // .sessionManagement(session ->
-        // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
