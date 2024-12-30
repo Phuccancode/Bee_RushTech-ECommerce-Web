@@ -179,9 +179,9 @@ public class AuthController {
                                                 + "<p>Showroom: 268, Lý Thường Kiệt, Phường 14, Quận 10, TP.HCM</p>"
                                                 + "</ul>"
                                                 + "</body>"
-                                                + "</html>");
+                                                + "</html>"); // tạo email để gửi thông báo reset password
 
-                this.emailService.sendEmail(newEmail);
+                this.emailService.sendEmail(newEmail); // gửi email thông báo reset password
                 return ResponseEntity.status(HttpStatus.OK).body(resetPasswordResponse);
         }
 
