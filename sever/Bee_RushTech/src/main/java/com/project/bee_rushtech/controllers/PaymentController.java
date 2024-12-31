@@ -33,12 +33,12 @@ public class PaymentController {
     @GetMapping("/vn-pay-callback")
     public ResponseEntity<?> payCallbackHandler(HttpServletRequest request) {
         try {
-            String status = request.getParameter("vnp_ResponseCode");
+            String status = request.getParameter("vnp_ResponseCode"); // Trạng thái thanh toán
             String redirectUrl;
             if (status.equals("00")) {
-                Long orderId = Long.parseLong(request.getParameter("vnp_OrderInfo"));
+                Long orderId = Long.parseLong(request.getParameter("vnp_OrderInfo")); // Mã đơn hàng
                 paymentService.handlePaymentOrder(orderId);
-                redirectUrl = "http://localhost:3000/success";
+                redirectUrl = "http://localhost:3000/success"; // URL trả về khi thanh toán thành công
                 return ResponseEntity.status(HttpStatus.FOUND)
                         .header("Location", redirectUrl)
                         .body(null);

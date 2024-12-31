@@ -35,7 +35,7 @@ public class EmailService {
     public void sendEmail(Email email) {
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
-            MimeMessageHelper helper = new MimeMessageHelper(message, true); 
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom("beerushtech@gmail.com"); // tài khoản gửi mail
             helper.setTo(email.getToEmail()); // tài khoản nhận mail
             helper.setSubject(email.getSubject()); // tiêu đề mail
@@ -77,34 +77,6 @@ public class EmailService {
         }
 
         String subject = "[BeeRushTech] Order Confirmation";
-        // String body = "Dear "
-        // + user.getFullName() + ",\n\n"
-        // + "Thank you for trusting and using our services. Your order has been
-        // confirmed and is being prepared. You can review the order details below:\n\n"
-        // + "INFORMATION ABOUT ORDER " + order.getId() + "\n"
-        // + result.toString()
-        // + "Total Price: " + order.getTotalMoney().longValue() + " VND" + "\n"
-        // + "Payment Method: " + order.getPaymentMethod() + "\n"
-        // + "Shipping Number: " + order.getTrackingNumber() + "\n\n"
-        // + "Delivery Address: " + order.getAddress() + "\n\n"
-        // + "To invoke your right to change any information, please contact us at least
-        // 24 hours in advance.\n"
-        // + "Best,\n" + "Customer Service at Bee RushTech\n\n"
-        // + "Attention:\n"
-        // + " 1. Before picking up your package, please check that it has not been
-        // damaged or tampered with. If the package is damaged, and you are afraid that
-        // the parcel may have been opened before it was delivered to you, remember to
-        // create a ticket with the courier. Only this way can we determine the guilty
-        // party and, if applicable, return your money or arrange another shipment.\n"
-        // + " 2. During the rental period, if any damage occurs to the equipment, the
-        // renter is responsible for covering the entire repair cost. In the event that
-        // the equipment cannot be repaired, the renter must compensate for the cost of
-        // purchasing the equipment. Additionally, the renter must compensate for any
-        // economic loss resulting from the equipment being unavailable for rental.\n\n"
-        // + "Please contact us in the following ways:\n"
-        // + "Email:beerushtech@gmail.com\n"
-        // + "Phone: 0123456789\n"
-        // + "Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.\n";
         String body = "<html>"
                 + "<body>"
                 + "<p style='font-weight: bold;'>Dear " + user.getFullName() + ",</p>"
