@@ -3,7 +3,6 @@ package com.project.bee_rushtech.controllers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -35,12 +34,10 @@ import com.project.bee_rushtech.utils.SecurityUtil;
 import com.project.bee_rushtech.utils.annotation.ApiMessage;
 import com.project.bee_rushtech.utils.errors.InvalidException;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.UUID;
 import java.util.Map;
@@ -82,7 +79,10 @@ public class AuthController {
                 }
                 String hashPassword = this.passwordEncoder.encode(user.getPassword());
                 user.setPassword(hashPassword);
-                user.setRole("CUSTOMER");
+                if (user.getEmail().contains(".edu.vn")) {
+                        user.setRole("STUDENT");
+                } else
+                        user.setRole("CUSTOMER");
                 User newUser = this.userService.handleCreateUser(user);
 
                 UserResponse userResponse = new UserResponse();
@@ -91,7 +91,7 @@ public class AuthController {
                 userResponse.setEmail(newUser.getEmail());
                 userResponse.setPhoneNumber(newUser.getPhoneNumber());
                 userResponse.setAddress(newUser.getAddress());
-                userResponse.setRole("CUSTOMER");
+                userResponse.setRole(newUser.getRole());
                 return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
         }
 
@@ -120,18 +120,11 @@ public class AuthController {
                 String access_token = this.securityUtil.createAccessToken(loginDTO.getUsername(), userLogin);
                 resLoginDTO.setAccessToken(access_token);
                 String refresh_token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), resLoginDTO);
-                ResponseCookie cookie = ResponseCookie
-                                .from("refresh_token", refresh_token)
-                                .httpOnly(true)
-                                .maxAge(jwtRefreshExpiration)
-                                .path("/")
-                                .build();
 
                 this.userService.updateUserToken(refresh_token, loginDTO.getUsername());
 
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + access_token)
-                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
                                 .body(resLoginDTO);
         }
 
@@ -145,47 +138,49 @@ public class AuthController {
                 }
                 this.userService.updateUserToken("", email);
 
-                ResponseCookie cookie = ResponseCookie
-                                .from("refresh_token", "")
-                                .httpOnly(true)
-                                .maxAge(0)
-                                .path("/")
-                                .build();
-
                 return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
                                 .body(null);
         }
 
         @PostMapping("/reset-password")
         public ResponseEntity<ResetPasswordResponse> resetPassword(HttpServletRequest request,
-                        @RequestParam("email") String email)
+                        @RequestParam String email)
                         throws InvalidException {
-                User currentUser = this.userService.getUserByEmail(email);
+
+                System.out.println(email);
+                User currentUser = this.userService.getUserByEmail(email); // kiểm tra xem email có tồn tại trong db
+                                                                           // không
                 if (currentUser == null) {
                         throw new InvalidException("User not found");
                 }
-                String token = UUID.randomUUID().toString().replace("-", "");
+                String token = UUID.randomUUID().toString().replace("-", ""); // tạo token
                 ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
                 resetPasswordResponse.setToken(token);
                 currentUser.setPasswordResetToken(token);
-                this.userService.updatePasswordResetToken(token, currentUser);
-                String resetUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
-                                + "/customer/resetpassword?token=" + token;
-
+                this.userService.updatePasswordResetToken(token, currentUser); // cập nhật token vào db
                 Email newEmail = new Email(email, "[BeeRushTech] Reset your password",
-                                "Dear " + currentUser.getFullName() + ",\n\n"
-                                                + "We noticed that you forgot your login password and you are requesting a new password for the account associated with "
-                                                + email + ".\n\n"
-                                                + "Please click the link below to reset your password:\n\n" + resetUrl
-                                                + "\n\n"
-                                                + "Yours,\n"
-                                                + "The Bee RushTech team\n\n"
-                                                + "Please contact us in the following ways:\n"
-                                                + "Email: " + "beerushtech@gmail.com\n"
-                                                + "Tel: 0987654321\n"
-                                                + "Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City.\n");
-                this.emailService.sendEmail(newEmail);
+                                "<html>"
+                                                + "<body>"
+                                                + "<p style='font-weight: bold;'>Dear " + currentUser.getFullName()
+                                                + ",</p>"
+                                                + "<p>We noticed that you forgot your login password and you are requesting a new password for the account associated with <strong>"
+                                                + email + "</strong>.</p>"
+                                                + "<p>Please input OTP below to reset your password:</p>"
+                                                + "<p style='font-weight: bold;'> " + token + " </p>"
+                                                + "<br>"
+                                                + "<p>Yours,</p>"
+                                                + "<p>The Bee RushTech team</p>"
+                                                + "<br>"
+                                                + "<p>Please contact us in the following ways:</p>"
+                                                + "<ul>"
+                                                + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
+                                                + "<p>Phone: 0869018053</p>"
+                                                + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</p>"
+                                                + "</ul>"
+                                                + "</body>"
+                                                + "</html>"); // tạo email để gửi thông báo reset password
+
+                this.emailService.sendEmail(newEmail); // gửi email thông báo reset password
                 return ResponseEntity.status(HttpStatus.OK).body(resetPasswordResponse);
         }
 
@@ -210,20 +205,13 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.OK).body(null);
         }
 
-        @GetMapping("/login-with-google")
+        @PostMapping("/login-with-google")
         @ApiMessage("Login successfully")
-        public ResponseEntity<LoginResponse> getAccessToken(OAuth2AuthenticationToken authentication,
-                        HttpServletResponse response) {
-                String registrationId = authentication.getAuthorizedClientRegistrationId();
-
-                OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
-                                registrationId, authentication.getName());
-
-                String accessToken = client.getAccessToken().getTokenValue();
-
-                Map userInfoResponse = googleUserInfoService.getUserInfo(accessToken);
-                String email = (String) userInfoResponse.get("email");
-                String name = (String) userInfoResponse.get("name");
+        public ResponseEntity<LoginResponse> getAccessToken(@RequestBody Map<String, String> requestBody) {
+                String accessToken = requestBody.get("token");
+                Map<String, Object> info = GoogleService.getUserInfo(accessToken);
+                String email = info.get("email").toString();
+                String name = info.get("name").toString();
                 if (this.userService.checkUserExists(email) == false) {
                         User user = new User();
                         user.setEmail(email);
@@ -232,27 +220,21 @@ public class AuthController {
                         user.setPassword("LOGIN_WITH_GOOGLE");
                         user.setPhoneNumber("0000000000");
                         this.userService.handleCreateUser(user);
-                }
+                } // kiểm tra nếu user chưa tồn tại thì tạo mới
 
+                // Nạp input gồm username/password vào Security và tạo token cho user trong hệ
+                // thống
                 LoginResponse resLoginDTO = new LoginResponse();
                 User userDB = this.userService.getUserByEmail(email);
                 LoginResponse.UserLogin userLogin = new LoginResponse.UserLogin(userDB.getId(), userDB.getEmail(),
                                 userDB.getFullName(), userDB.getRole());
                 resLoginDTO.setUser(userLogin);
                 String access_token = this.securityUtil.createAccessToken(email, userLogin);
-                String refreshToken = this.securityUtil.createRefreshToken(email, resLoginDTO);
+                String refreshToken = this.securityUtil.createRefreshToken(email,
+                                resLoginDTO);
                 resLoginDTO.setAccessToken(access_token);
                 this.userService.updateUserToken(refreshToken, email);
-
-                ResponseCookie cookie = ResponseCookie
-                                .from("refresh_token", refreshToken)
-                                .httpOnly(true)
-                                .maxAge(3600 * 24)
-                                .path("/")
-                                .build();
-
                 return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, cookie.toString())
                                 .body(resLoginDTO);
         }
 

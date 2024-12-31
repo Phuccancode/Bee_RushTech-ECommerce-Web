@@ -1,5 +1,7 @@
 package com.project.bee_rushtech.responses;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,5 +15,7 @@ public class UserResponse {
     private String email;
     private String phoneNumber;
     private String address;
+    private Date dateOfBirth;
     private String role;
+
 }

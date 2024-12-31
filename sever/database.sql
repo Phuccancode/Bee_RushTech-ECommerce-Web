@@ -1,38 +1,35 @@
 
-CREATE DATABASE shopapp;
-USE shopapp;
+CREATE DATABASE shopapp_test;
+USE shopapp_test;
 -- Khách hàng khi muốn mua hàng => phải đăng ký tài khoản => bảng users
 
 CREATE TABLE users(
     id INT PRIMARY KEY auto_increment,
-    full_name VARCHAR(100) DEFAULT '',
-    phone_number CHAR(10) NOT NULL,
-    email VARCHAR (100) not null,
-    address VARCHAR(200) DEFAULT '',
+    full_name VARCHAR(100) not null,
+    phone_number CHAR(10),
+    email VARCHAR (100) not null ,
+    address VARCHAR(200),
     password VARCHAR(100) NOT NULL DEFAULT '',
     created_at DATETIME,
     updated_at DATETIME,
     is_active TINYINT(1) DEFAULT 1,
     date_of_birth DATE,
-    facebook_account_id INT DEFAULT 0,
-    google_account_id INT DEFAULT 0,
     role VARCHAR(10) DEFAULT 'CUSTOMER',
     refresh_token mediumtext,
-    password_reset_token mediumtext,
-    FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE DEFAULT
+    password_reset_token mediumtext
 );
 
 
 -- hỗ trợ đăng nhập từ Facebook và Google
-CREATE TABLE social_accounts(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    provider VARCHAR(20) NOT NULL COMMENT 'Tên nhà social network',
-    provider_id CHAR(50) NOT NULL,
-    email VARCHAR(150) NOT NULL COMMENT 'Email tài khoản',
-    name VARCHAR(100) NOT NULL COMMENT 'Tên người dùng',
-    user_id INT,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+-- CREATE TABLE social_accounts(
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     provider VARCHAR(20) NOT NULL COMMENT 'Tên nhà social network',
+--     provider_id CHAR(50) NOT NULL,
+--     email VARCHAR(150) NOT NULL COMMENT 'Email tài khoản',
+--     name VARCHAR(100) NOT NULL COMMENT 'Tên người dùng',
+--     user_id INT,
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- );
 
 -- Bảng danh mục sản phẩm(Category)
 CREATE TABLE categories(
@@ -86,7 +83,8 @@ CREATE TABLE order_details(
     price FLOAT CHECK(price >= 0),
     number_of_products INT CHECK(number_of_products > 0),
     total_money FLOAT CHECK(total_money >= 0),
-	return_date DATE NOT NULL,
+	return_date DATETIME NOT NULL,
+    time_renting INT ,
     return_method ENUM('home', 'store'),
     FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
     FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE

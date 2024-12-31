@@ -1,6 +1,5 @@
 package com.project.bee_rushtech.responses;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.bee_rushtech.models.Order;
 import lombok.Data;
@@ -8,6 +7,8 @@ import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
+
 @Data
 public class OrderResponse {
     private Long id;
@@ -28,7 +29,7 @@ public class OrderResponse {
     private String note;
 
     @JsonProperty("order_date")
-    private LocalDateTime orderDate;
+    private Date orderDate;
 
     private String status;
 
@@ -50,15 +51,33 @@ public class OrderResponse {
     @JsonProperty("payment_method")
     private String paymentMethod;
 
-    private Boolean active;//thuộc về admin
+    @JsonProperty("order_method")
+    private String orderMethod;
 
-    public static OrderResponse fromOrder(Order order){
+    @JsonProperty("payment_url")
+    private String paymentUrl;
+
+    private Boolean active;// thuộc về admin
+
+    public static OrderResponse fromOrder(Order order) {
+
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.typeMap(Order.class, OrderResponse.class)
                 .addMappings(mapper -> mapper.skip(OrderResponse::setUserId));
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
         orderResponse.setUserId(order.getUser().getId());
-        //model mapper phai match all fields, neu co 1 filed khong match thi phai skip,
+        orderResponse.setOrderDate(order.getOrderDate());
+        orderResponse.setStatus(order.getStatus());
+        orderResponse.setTotalMoney(order.getTotalMoney());
+        orderResponse.setShippingMethod(order.getShippingMethod());
+        orderResponse.setShippingAddress(order.getShippingAddress());
+        orderResponse.setShippingDate(order.getShippingDate());
+        orderResponse.setTrackingNumber(order.getTrackingNumber());
+        orderResponse.setPaymentMethod(order.getPaymentMethod());
+        orderResponse.setOrderMethod(order.getOrderMethod());
+        orderResponse.setPaymentUrl(order.getPaymentUrl());
+        orderResponse.setActive(order.getActive());
+        // model mapper phai match all fields, neu co 1 filed khong match thi phai skip,
         // khong skip thi gia tri tra ve se bi null het
         return orderResponse;
     }

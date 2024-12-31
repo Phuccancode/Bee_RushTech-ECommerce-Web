@@ -64,20 +64,20 @@ public class CartController {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         Long userId = this.securityUtil.getUserFromToken(token).getId();
         Cart geCart = cartService.getByUserId(userId);
+        List<CartItemResponse> cartResponse = new ArrayList<>();
         if (geCart == null) {
-            throw new InvalidException("Your cart is empty!");
+            return ResponseEntity.status(HttpStatus.OK).body(cartResponse);
         }
         Long CartId = geCart.getId();
         List<CartItem> cart = cartService.getAllCartItems(CartId);
-        List<CartItemResponse> cartResponse = new ArrayList<>();
-        AtomicLong index = new AtomicLong(1);
+
         for (CartItem item : cart) {
             CartItemResponse res = new CartItemResponse();
-            res.setIndex(index.getAndIncrement());
+            res.setId(item.getId());
             res.setProductId(item.getProduct().getId());
             res.setQuantity(item.getQuantity());
+            res.setPriceProduct(item.getProduct().getPrice());
             res.setName(item.getProduct().getName());
-            res.setPrice(item.getProduct().getPrice());
             cartResponse.add(res);
         }
 
@@ -101,11 +101,10 @@ public class CartController {
         cartItem.setQuantity(cartItemDTO.getQuantity());
         this.cartService.updateCartItem(cartItem);
         CartItemResponse cartResponse = new CartItemResponse();
-        cartResponse.setIndex(Long.parseLong("1"));
+        cartResponse.setId(cartItem.getId());
         cartResponse.setProductId(cartItem.getProduct().getId());
         cartResponse.setQuantity(cartItemDTO.getQuantity());
         cartResponse.setName(cartItem.getProduct().getName());
-        cartResponse.setPrice(cartItem.getProduct().getPrice());
         return ResponseEntity.ok(cartResponse);
     }
 
