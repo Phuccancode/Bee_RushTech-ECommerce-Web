@@ -144,8 +144,10 @@ public class AuthController {
 
         @PostMapping("/reset-password")
         public ResponseEntity<ResetPasswordResponse> resetPassword(HttpServletRequest request,
-                        @RequestParam("email") String email)
+                        @RequestParam String email)
                         throws InvalidException {
+
+                System.out.println(email);
                 User currentUser = this.userService.getUserByEmail(email); // kiểm tra xem email có tồn tại trong db
                                                                            // không
                 if (currentUser == null) {
@@ -155,28 +157,25 @@ public class AuthController {
                 ResetPasswordResponse resetPasswordResponse = new ResetPasswordResponse();
                 resetPasswordResponse.setToken(token);
                 currentUser.setPasswordResetToken(token);
-                this.userService.updatePasswordResetToken(token, currentUser);
-                String resetUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
-                                + "/customer/resetpassword?token=" + token;
-
+                this.userService.updatePasswordResetToken(token, currentUser); // cập nhật token vào db
                 Email newEmail = new Email(email, "[BeeRushTech] Reset your password",
                                 "<html>"
                                                 + "<body>"
-                                                + "<p style='font-weight: bold;'>Kính gửi " + currentUser.getFullName()
+                                                + "<p style='font-weight: bold;'>Dear " + currentUser.getFullName()
                                                 + ",</p>"
-                                                + "<p>Chúng tôi nhận thấy bạn đã quên mật khẩu đăng nhập và đang yêu cầu cấp lại mật khẩu cho tài khoản liên kết với <strong>"
+                                                + "<p>We noticed that you forgot your login password and you are requesting a new password for the account associated with <strong>"
                                                 + email + "</strong>.</p>"
-                                                + "<p>Vui lòng nhấp vào liên kết dưới đây để đặt lại mật khẩu của bạn:</p>"
-                                                + "<p><a href='" + resetUrl + "'>" + resetUrl + "</a></p>"
+                                                + "<p>Please input OTP below to reset your password:</p>"
+                                                + "<p style='font-weight: bold;'> " + token + " </p>"
                                                 + "<br>"
-                                                + "<p>Trân trọng,</p>"
-                                                + "<p>Đội ngũ Bee RushTech</p>"
+                                                + "<p>Yours,</p>"
+                                                + "<p>The Bee RushTech team</p>"
                                                 + "<br>"
-                                                + "<p>Vui lòng liên hệ với chúng tôi qua các phương thức sau:</p>"
+                                                + "<p>Please contact us in the following ways:</p>"
                                                 + "<ul>"
                                                 + "<p>Email: hien.nguyenhophuoc@hcmut.edu.vn</p>"
-                                                + "<p>Điện thoại: 0869018053</p>"
-                                                + "<p>Showroom: 268, Lý Thường Kiệt, Phường 14, Quận 10, TP.HCM</p>"
+                                                + "<p>Phone: 0869018053</p>"
+                                                + "<p>Showroom: 268, Ly Thuong Kiet, Ward 14, District 10, HCM City</p>"
                                                 + "</ul>"
                                                 + "</body>"
                                                 + "</html>"); // tạo email để gửi thông báo reset password
